@@ -264,10 +264,6 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
 
               <AddToCartButton book={book} />
 
-              <Link href="/checkout" className="btn-primary w-full mt-3 justify-center text-center block">
-                Buy Now
-              </Link>
-
               {book.sample_url && (
                 <a href={book.sample_url} target="_blank" rel="noopener noreferrer" className="btn-outline w-full mt-2 justify-center text-sm">
                   📄 Preview Sample
@@ -281,7 +277,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-green-500" />
-                  Secure card payment via Stripe
+                  Secure payment via PayFast or Stripe
                 </div>
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-blue-500" />

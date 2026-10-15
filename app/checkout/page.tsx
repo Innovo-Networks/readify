@@ -7,12 +7,12 @@ import Image from 'next/image'
 import { formatZAR, calculateTotal, applyPromotion } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { ENABLED_PAYMENT_METHODS, isSeedBookId, type PaymentMethod } from '@/lib/payments'
-import { CreditCard, Bitcoin, ArrowLeft, Tag, Loader2, ShieldCheck, BookOpen, Wallet } from 'lucide-react'
+import { CreditCard, Bitcoin, ArrowLeft, Tag, Loader2, ShieldCheck, BookOpen, Wallet, Banknote } from 'lucide-react'
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
   const router  = useRouter()
-  const [method,       setMethod]       = useState<PaymentMethod>('stripe')
+  const [method,       setMethod]       = useState<PaymentMethod>(ENABLED_PAYMENT_METHODS[0])
   const [loading,      setLoading]      = useState(false)
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState<{ name: string; discount: number } | null>(null)
@@ -92,7 +92,26 @@ export default function CheckoutPage() {
       )
       if (itemsError) throw new Error('Could not add the books to your order. Please try again.')
 
-      if (method === 'stripe') {
+      if (method === 'payfast') {
+        const res = await fetch('/api/payfast/create-payment', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: order.id }),
+        })
+        const data = await res.json()
+        if (!res.ok || !data.url || !data.fields) throw new Error(data.error || 'PayFast could not be started. Please try again later.')
+        // PayFast expects a form POST to its hosted page.
+        const form = document.createElement('form')
+        form.method = 'POST'
+        form.action = data.url
+        for (const [name, value] of Object.entries(data.fields as Record<string, string>)) {
+          const input = document.createElement('input')
+          input.type = 'hidden'; input.name = name; input.value = value
+          form.appendChild(input)
+        }
+        document.body.appendChild(form)
+        form.submit()
+        return
+      } else if (method === 'stripe') {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: order.id, items: items.map((i) => ({ title: i.book.title, price: i.book.price, quantity: 1 })), buyerEmail: form.email }),
@@ -207,7 +226,8 @@ export default function CheckoutPage() {
               <h2 className="font-semibold mb-5" style={{ color: 'var(--text)' }}>Payment Method</h2>
               <div className="space-y-3">
                 {([
-                  { id: 'stripe',   label: 'Credit / Debit Card',   sub: 'Visa, Mastercard · powered by Stripe', icon: CreditCard, badge: 'Most Popular', color: 'text-blue-400' },
+                  { id: 'payfast',  label: 'PayFast',               sub: 'Card, Instant EFT, SnapScan, Zapper, Mobicred', icon: Banknote, badge: 'South Africa', color: 'text-emerald-400' },
+                { id: 'stripe',   label: 'Credit / Debit Card',   sub: 'Visa, Mastercard · powered by Stripe', icon: CreditCard, badge: null,          color: 'text-blue-400' },
                   { id: 'paypal',   label: 'PayPal',                sub: 'Pay with your PayPal account',        icon: Wallet,     badge: null,          color: 'text-blue-500' },
                   { id: 'coinbase', label: 'Cryptocurrency',         sub: 'Bitcoin, Ethereum, USDC and more',   icon: Bitcoin,    badge: 'New',         color: 'text-orange-400' },
                 ] as const).filter((pm) => ENABLED_PAYMENT_METHODS.includes(pm.id)).map((pm) => {

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Mail, Phone, MapPin, CreditCard, Wallet, ShieldCheck } from 'lucide-react'
-import { PAYPAL_ENABLED } from '@/lib/payments'
+import { Mail, Phone, MapPin, CreditCard, Wallet, ShieldCheck, Banknote } from 'lucide-react'
+import { PAYFAST_ENABLED, PAYPAL_ENABLED } from '@/lib/payments'
 
 export default function Footer() {
   return (
@@ -123,6 +123,7 @@ export default function Footer() {
               {[
                 { label: 'Visa',       icon: CreditCard, color: '#60a5fa' },
                 { label: 'Mastercard', icon: CreditCard, color: '#f87171' },
+                ...(PAYFAST_ENABLED ? [{ label: 'PayFast', icon: Banknote, color: '#34d399' }] : []),
                 ...(PAYPAL_ENABLED ? [{ label: 'PayPal', icon: Wallet, color: '#34d399' }] : []),
                 { label: 'Stripe',     icon: ShieldCheck, color: '#f5a623' },
               ].map((m) => (

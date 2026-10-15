@@ -108,7 +108,7 @@ export interface Order {
   vat_rate: number
   total: number
   currency: string
-  payment_method: 'stripe' | 'paypal' | 'coinbase' | 'free' | null
+  payment_method: 'payfast' | 'stripe' | 'paypal' | 'coinbase' | 'free' | null
   payment_id: string | null
   promotion_id: string | null
   promotion_code: string | null
@@ -167,7 +167,7 @@ export interface CheckoutPayload {
   promotion_code?: string
   buyer_email: string
   buyer_name: string
-  payment_method: 'stripe' | 'paypal' | 'coinbase'
+  payment_method: 'payfast' | 'stripe' | 'paypal' | 'coinbase'
 }
 
 export interface PriceBreakdown {

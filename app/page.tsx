@@ -5,10 +5,10 @@ import BookCard from '@/components/books/BookCard'
 import {
   ArrowRight, BookOpen, ShieldCheck, Zap, Globe, Star, Upload, DollarSign, Users,
   TrendingUp, Leaf, Brain, Rocket, BarChart2, Cpu, Building2, Heart,
-  CreditCard, Wallet, Download, CheckCircle,
+  CreditCard, Wallet, Download, CheckCircle, Banknote,
 } from 'lucide-react'
 import type { Book } from '@/types'
-import { PAYPAL_ENABLED, COINBASE_ENABLED } from '@/lib/payments'
+import { PAYFAST_ENABLED, PAYPAL_ENABLED, COINBASE_ENABLED } from '@/lib/payments'
 
 async function getFeaturedBooks(): Promise<Book[]> {
   const supabase = await createClient()
@@ -352,6 +352,14 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
             {[
+              ...(PAYFAST_ENABLED ? [{
+                icon: Banknote,
+                title: 'PayFast',
+                desc: 'Card, Instant EFT, SnapScan, Zapper and Mobicred through South Africa\x27s PayFast.',
+                tag: 'Local SA',
+                tagColor: '#34d399',
+                iconColor: '#34d399',
+              }] : []),
               {
                 icon: CreditCard,
                 title: 'Credit & Debit Card',
@@ -445,7 +453,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               { step: '01', icon: BookOpen,    title: 'Browse & Choose', desc: 'Explore thousands of ebooks across categories and find your next great read.' },
-              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely by card through Stripe. 15% SA VAT included in all prices.' },
+              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely by card or Instant EFT. 15% SA VAT included in all prices.' },
               { step: '03', icon: Download,    title: 'Instant Download', desc: 'Get immediate access to your ebook. Download to any device, anytime.' },
             ].map((s) => (
               <div key={s.step} className="glass-card p-6 relative">

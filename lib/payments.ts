@@ -12,9 +12,13 @@ export const COINBASE_ENABLED = process.env.NEXT_PUBLIC_COINBASE_ENABLED === 'tr
 
 export const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true'
 
-export type PaymentMethod = 'stripe' | 'paypal' | 'coinbase'
+// PayFast (South Africa): card, Instant EFT, SnapScan, Zapper, Mobicred. Listed first when on.
+export const PAYFAST_ENABLED = process.env.NEXT_PUBLIC_PAYFAST_ENABLED === 'true'
+
+export type PaymentMethod = 'payfast' | 'stripe' | 'paypal' | 'coinbase'
 
 export const ENABLED_PAYMENT_METHODS: readonly PaymentMethod[] = [
+  ...(PAYFAST_ENABLED ? (['payfast'] as const) : []),
   'stripe',
   ...(PAYPAL_ENABLED ? (['paypal'] as const) : []),
   ...(COINBASE_ENABLED ? (['coinbase'] as const) : []),

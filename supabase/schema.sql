@@ -195,7 +195,7 @@ create table public.orders (
   vat_rate        decimal(5,2) not null default 15.00,
   total           decimal(10,2) not null,
   currency        text not null default 'ZAR',
-  payment_method  text check (payment_method in ('stripe','paypal','coinbase','free')),
+  payment_method  text check (payment_method in ('payfast','stripe','paypal','coinbase','free')),
   payment_id      text,                               -- external payment reference
   promotion_id    uuid references public.promotions(id),
   promotion_code  text,

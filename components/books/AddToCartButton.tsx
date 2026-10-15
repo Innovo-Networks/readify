@@ -1,12 +1,19 @@
 'use client'
 import { useCart } from '@/components/cart/CartProvider'
-import { ShoppingCart, Check } from 'lucide-react'
+import { ShoppingCart, Check, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { Book } from '@/types'
 
 export default function AddToCartButton({ book }: { book: Book }) {
   const { addItem, removeItem, isInCart } = useCart()
+  const router = useRouter()
   const inCart = isInCart(book.id)
+
+  const buyNow = () => {
+    if (!inCart) addItem(book)
+    router.push('/checkout')
+  }
 
   if (inCart) {
     return (
@@ -30,12 +37,18 @@ export default function AddToCartButton({ book }: { book: Book }) {
   }
 
   return (
-    <button
-      onClick={() => addItem(book)}
-      className="btn-outline w-full justify-center"
-    >
-      <ShoppingCart className="w-4 h-4" />
-      Add to Cart
-    </button>
+    <div className="space-y-3">
+      <button
+        onClick={() => addItem(book)}
+        className="btn-outline w-full justify-center"
+      >
+        <ShoppingCart className="w-4 h-4" />
+        Add to Cart
+      </button>
+      <button onClick={buyNow} className="btn-primary w-full justify-center">
+        <Zap className="w-4 h-4" />
+        Buy Now
+      </button>
+    </div>
   )
 }
