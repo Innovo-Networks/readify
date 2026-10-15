@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Check, Download, BookOpen, ArrowRight, Library } from 'lucide-react'
+import { Check, Clock, X, Download, BookOpen, ArrowRight, Library } from 'lucide-react'
 
 export default async function CheckoutSuccessPage({
   searchParams,
@@ -31,25 +31,39 @@ export default async function CheckoutSuccessPage({
         .order('created_at', { ascending: false })
     : { data: null }
 
+  // The payment provider confirms server-to-server (Stripe webhook / PayFast ITN),
+  // which can land a few seconds after the buyer is redirected here.
+  const status: string = order?.status ?? 'unknown'
+  const paid    = status === 'paid'
+  const failed  = status === 'failed' || status === 'cancelled'
+  const tone    = paid ? '34,197,94' : failed ? '239,68,68' : '245,166,35'
+  const Icon    = paid ? Check : failed ? X : Clock
+  const heading = paid ? 'Payment Successful!' : failed ? 'Payment Not Completed' : 'Confirming Your Payment…'
+  const blurb   = paid
+    ? 'Your ebooks are ready to download. Check your email for a confirmation.'
+    : failed
+      ? 'The payment was declined or cancelled. Nothing has been charged; you can try again from your cart.'
+      : 'We are waiting for the payment provider to confirm. This usually takes a few seconds — refresh this page, or find the download later in My Library.'
+
   return (
     <div
       className="min-h-screen flex items-center justify-center px-6 py-16"
       style={{ background: 'var(--bg)' }}
     >
       <div className="max-w-lg w-full">
-        {/* Success icon */}
+        {/* Status icon */}
         <div className="text-center mb-8">
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 animate-fade-in"
-            style={{ background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.3)' }}
+            style={{ background: `rgba(,0.12)`, border: `2px solid rgba(,0.3)` }}
           >
-            <Check className="w-12 h-12 text-green-400" />
+            <Icon className="w-12 h-12" style={{ color: `rgb()` }} />
           </div>
           <h1 className="font-display text-4xl font-bold mb-3" style={{ color: 'var(--text)' }}>
-            Payment Successful!
+            {heading}
           </h1>
           <p className="mb-2" style={{ color: 'var(--text-muted)' }}>
-            Your ebooks are ready to download. Check your email for a confirmation.
+            {blurb}
           </p>
           {order_id && (
             <p className="text-xs font-mono" style={{ color: 'var(--text-subtle)' }}>
