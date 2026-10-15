@@ -404,8 +404,39 @@ create trigger on_review_created
   for each row execute function public.update_book_rating();
 
 -- ============================================================
--- STORAGE BUCKETS (run in Supabase Dashboard → Storage)
+-- STORAGE BUCKETS + OBJECT POLICIES
 -- ============================================================
--- insert into storage.buckets (id, name, public) values ('ebooks', 'ebooks', false);
--- insert into storage.buckets (id, name, public) values ('covers', 'covers', true);
--- insert into storage.buckets (id, name, public) values ('logos', 'logos', true);
+insert into storage.buckets (id, name, public)
+values ('ebooks', 'ebooks', false),
+       ('covers', 'covers', true),
+       ('logos',  'logos',  true)
+on conflict (id) do nothing;
+
+-- Public buckets are readable by anyone; ebooks are only served via signed URLs
+-- generated with the service role (app/api/download/[token]/route.ts).
+create policy "Public read of covers and logos"
+  on storage.objects for select
+  using (bucket_id in ('covers', 'logos'));
+
+-- Authenticated users may write only under <bucket>/<their uid>/... paths,
+-- which is how the upload page names files (covers/<uid>/..., ebooks/<uid>/...).
+create policy "Users upload to own folder"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id in ('ebooks', 'covers', 'logos')
+    and (storage.foldername(name))[2] = auth.uid()::text
+  );
+
+create policy "Users update own files"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id in ('ebooks', 'covers', 'logos')
+    and (storage.foldername(name))[2] = auth.uid()::text
+  );
+
+create policy "Users delete own files"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id in ('ebooks', 'covers', 'logos')
+    and (storage.foldername(name))[2] = auth.uid()::text
+  );

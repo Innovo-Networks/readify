@@ -20,9 +20,14 @@ npm install
 
 ## 2. Supabase Setup
 
+> **Current project (Oct 2026):** `innovo's Project`, ref `fqoikovjipnjywzbnvpa`, region eu-west-1,
+> URL `https://fqoikovjipnjywzbnvpa.supabase.co`. `schema.sql` and the storage buckets below were
+> applied on 2026-10-15 as migrations `readify_initial_schema` and `readify_storage_buckets`.
+> For a fresh project, follow the steps below.
+
 1. Create a project at [supabase.com](https://supabase.com)
 2. Go to **SQL Editor** → paste and run `supabase/schema.sql`
-3. Go to **Storage** → create two buckets:
+3. Go to **Storage** → create three buckets (or run the bucket SQL at the end of `schema.sql`):
    - `ebooks` — **private** (ebook PDFs)
    - `covers` — **public** (book cover images)
    - `logos` — **public** (publisher logos)
