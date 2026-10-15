@@ -4,7 +4,7 @@
 
 | Piece | Where |
 |---|---|
-| Code | `C:\Users\DamianMichael\readify` → GitHub **Innovonetworks/readify**, branch `main` |
+| Code | `C:\Users\DamianMichael\readify` → GitHub **Innovo-Networks/readify**, branch `main` |
 | Hosting | Vercel project **readify** (team Innovo Networks), production https://readify-iota.vercel.app |
 | Database / auth / storage | Supabase project **innovo's Project** (`fqoikovjipnjywzbnvpa`, eu-west-1); schema and buckets applied as migrations |
 | Payments | Stripe only. PayPal and Coinbase code exists but stays hidden until real keys are set (see `lib/payments.ts`) |
