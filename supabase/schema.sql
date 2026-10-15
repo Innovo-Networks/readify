@@ -361,6 +361,9 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Trigger-only: never callable through the REST API.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 -- Called by lib/fulfillment.ts (service role) once an order is paid:
 -- bumps the book's sales counters and credits the publisher's net earnings.
 create or replace function public.increment_book_sales(p_book_id uuid, p_price numeric)
@@ -386,9 +389,14 @@ begin
 end;
 $$;
 
+-- Only the service role (lib/fulfillment.ts) may call this; otherwise any visitor
+-- could inflate sales counters and publisher earnings via /rest/v1/rpc.
+revoke execute on function public.increment_book_sales(uuid, numeric) from public, anon, authenticated;
+grant  execute on function public.increment_book_sales(uuid, numeric) to service_role;
+
 -- Trigger: update book rating when review added
 create or replace function public.update_book_rating()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = public as $$
 begin
   update public.books
   set
