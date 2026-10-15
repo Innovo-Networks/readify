@@ -42,7 +42,12 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { full_name: form.name, role } },
+      options: {
+        data: { full_name: form.name, role },
+        // Send the confirmation link back to whichever host the user signed up on
+        // (production, a Vercel preview, or localhost) instead of the Supabase Site URL.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     if (error) { setError(error.message); setLoading(false); return }
     setSuccess(true)
