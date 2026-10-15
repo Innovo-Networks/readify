@@ -90,7 +90,7 @@ export default function CartPage() {
                     </p>
                   )}
                   <p className="text-xs mt-1 font-mono" style={{ color: 'var(--text-subtle)' }}>
-                    {book.file_format || 'PDF'} · Digital Download
+                    PDF · Digital Download
                   </p>
                 </div>
 

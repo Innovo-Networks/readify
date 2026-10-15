@@ -90,7 +90,7 @@ export default function NewBookPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { data: publisher } = await supabase.from('publishers').select('id, status').eq('user_id', user.id).single()
+      const { data: publisher } = await supabase.from('publishers').select('id, status').eq('id', user.id).single()
       if (!publisher || publisher.status !== 'approved') {
         throw new Error('Your publisher account must be approved before uploading books.')
       }
@@ -102,9 +102,9 @@ export default function NewBookPage() {
       if (coverFile) {
         setUploadProgress('Uploading cover image…')
         const coverPath = `covers/${user.id}/${Date.now()}-${coverFile.name}`
-        const { error: coverErr } = await supabase.storage.from('book-covers').upload(coverPath, coverFile, { upsert: true })
+        const { error: coverErr } = await supabase.storage.from('covers').upload(coverPath, coverFile, { upsert: true })
         if (coverErr) throw new Error('Cover upload failed: ' + coverErr.message)
-        const { data: { publicUrl } } = supabase.storage.from('book-covers').getPublicUrl(coverPath)
+        const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(coverPath)
         coverUrl = publicUrl
       }
 
@@ -112,7 +112,7 @@ export default function NewBookPage() {
       if (ebookFile) {
         setUploadProgress('Uploading ebook file…')
         const filePath = `ebooks/${user.id}/${Date.now()}-${ebookFile.name}`
-        const { error: fileErr } = await supabase.storage.from('book-files').upload(filePath, ebookFile, { upsert: true })
+        const { error: fileErr } = await supabase.storage.from('ebooks').upload(filePath, ebookFile, { upsert: true })
         if (fileErr) throw new Error('File upload failed: ' + fileErr.message)
         fileUrl = filePath
       }

@@ -18,15 +18,17 @@ export default async function CheckoutSuccessPage({
         .single()
     : { data: null }
 
-  const { data: user } = (await supabase.auth.getUser()).data
+  const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: purchases } = order_id && user
+  // Download tokens issued for this order (see lib/fulfillment.ts)
+  const orderItemIds: string[] = ((order?.order_items as any[]) || []).map((i) => i.id)
+  const { data: purchases } = user && orderItemIds.length > 0
     ? await supabase
-        .from('purchases')
+        .from('downloads')
         .select('*, books(title)')
         .eq('buyer_id', user.id)
-        .order('purchased_at', { ascending: false })
-        .limit(20)
+        .in('order_item_id', orderItemIds)
+        .order('created_at', { ascending: false })
     : { data: null }
 
   return (

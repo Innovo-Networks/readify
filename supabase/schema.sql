@@ -218,6 +218,9 @@ create policy "Admins can view all orders"
   on public.orders for all using (
     exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
   );
+create policy "Buyers can create own orders"
+  on public.orders for insert
+  with check (buyer_id = auth.uid() or buyer_id is null);
 
 -- ============================================================
 -- ORDER ITEMS
@@ -246,6 +249,11 @@ create policy "Order item visible to publisher"
 create policy "Admins view all order items"
   on public.order_items for all using (
     exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
+  );
+create policy "Buyers can add items to own orders"
+  on public.order_items for insert
+  with check (
+    exists (select 1 from public.orders where id = order_id and (buyer_id = auth.uid() or buyer_id is null))
   );
 
 -- ============================================================
@@ -352,6 +360,31 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Called by lib/fulfillment.ts (service role) once an order is paid:
+-- bumps the book's sales counters and credits the publisher's net earnings.
+create or replace function public.increment_book_sales(p_book_id uuid, p_price numeric)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  v_publisher_id uuid;
+  v_commission   numeric;
+begin
+  update public.books
+  set total_sales   = total_sales + 1,
+      total_revenue = total_revenue + coalesce(p_price, 0),
+      updated_at    = now()
+  where id = p_book_id
+  returning publisher_id into v_publisher_id;
+
+  if v_publisher_id is not null then
+    select commission_rate into v_commission from public.publishers where id = v_publisher_id;
+    update public.publishers
+    set total_earnings = total_earnings + coalesce(p_price, 0) * (1 - coalesce(v_commission, 20) / 100),
+        updated_at     = now()
+    where id = v_publisher_id;
+  end if;
+end;
+$$;
 
 -- Trigger: update book rating when review added
 create or replace function public.update_book_rating()

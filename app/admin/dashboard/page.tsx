@@ -26,12 +26,12 @@ export default async function AdminDashboardPage() {
     supabase.from('publishers').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('books').select('*', { count: 'exact', head: true }),
     supabase.from('books').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
-    supabase.from('orders').select('id, status, total_amount, created_at, payment_provider').order('created_at', { ascending: false }).limit(10),
-    supabase.from('publishers').select('id, company_name, contact_phone, vat_number, created_at, profiles(email, full_name)').eq('status', 'pending').order('created_at', { ascending: false }).limit(10),
+    supabase.from('orders').select('id, status, total, created_at, payment_method').order('created_at', { ascending: false }).limit(10),
+    supabase.from('publishers').select('id, company_name, phone, vat_number, created_at, profiles(email, full_name)').eq('status', 'pending').order('created_at', { ascending: false }).limit(10),
   ])
 
-  const { data: revenueData } = await supabase.from('orders').select('total_amount').eq('status', 'paid')
-  const totalRevenue = revenueData?.reduce((s, o) => s + (o.total_amount || 0), 0) || 0
+  const { data: revenueData } = await supabase.from('orders').select('total').eq('status', 'paid')
+  const totalRevenue = revenueData?.reduce((s, o) => s + (o.total || 0), 0) || 0
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -168,10 +168,10 @@ export default async function AdminDashboardPage() {
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-mono" style={{ color: 'var(--text-subtle)' }}>#{order.id.slice(0, 8).toUpperCase()}</p>
-                      <p className="text-xs capitalize" style={{ color: 'var(--text-subtle)' }}>{order.payment_provider}</p>
+                      <p className="text-xs capitalize" style={{ color: 'var(--text-subtle)' }}>{order.payment_method}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>{formatZAR(order.total_amount || 0)}</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>{formatZAR(order.total || 0)}</p>
                       <p className="text-xs capitalize" style={{ color: statusColor }}>{order.status}</p>
                     </div>
                   </div>

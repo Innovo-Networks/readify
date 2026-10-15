@@ -20,12 +20,12 @@ export default async function AccountPage() {
     .order('created_at', { ascending: false })
 
   const { data: purchases } = await supabase
-    .from('purchases')
-    .select('*, books(title, slug, cover_url, author, pages, file_format)')
+    .from('downloads')
+    .select('*, books(title, slug, cover_url, author, pages)')
     .eq('buyer_id', user.id)
-    .order('purchased_at', { ascending: false })
+    .order('created_at', { ascending: false })
 
-  const totalSpent = (orders as Order[])?.filter((o) => o.status === 'paid').reduce((s, o) => s + (o.total_amount || 0), 0) || 0
+  const totalSpent = (orders as Order[])?.filter((o) => o.status === 'paid').reduce((s, o) => s + (o.total || 0), 0) || 0
   const initial = (profile?.full_name?.[0] || user.email?.[0] || 'R').toUpperCase()
 
   return (
@@ -172,6 +172,8 @@ export default async function AccountPage() {
                     paid:    { bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.25)',  color: '#4ade80' },
                     pending: { bg: 'rgba(234,179,8,0.1)',  border: 'rgba(234,179,8,0.25)',  color: '#facc15' },
                     failed:  { bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.25)',  color: '#f87171' },
+                    refunded:  { bg: 'rgba(96,165,250,0.1)', border: 'rgba(96,165,250,0.25)', color: '#60a5fa' },
+                    cancelled: { bg: 'rgba(107,114,128,0.1)', border: 'rgba(107,114,128,0.25)', color: '#9ca3af' },
                   }[order.status] || { bg: 'var(--surface)', border: 'var(--border)', color: 'var(--text-subtle)' }
 
                   return (
@@ -196,7 +198,7 @@ export default async function AccountPage() {
                       <div className="text-xs mb-2" style={{ color: 'var(--text-subtle)' }}>
                         {new Date(order.created_at).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </div>
-                      <div className="font-bold" style={{ color: 'var(--gold)' }}>{formatZAR(order.total_amount || 0)}</div>
+                      <div className="font-bold" style={{ color: 'var(--gold)' }}>{formatZAR(order.total || 0)}</div>
                       <div className="text-xs mt-0.5" style={{ color: 'var(--text-subtle)' }}>
                         {(order.order_items as any[])?.length || 0} item{(order.order_items as any[])?.length !== 1 ? 's' : ''}
                       </div>

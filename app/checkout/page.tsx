@@ -58,12 +58,18 @@ export default function CheckoutPage() {
       const { data: { user } } = await supabase.auth.getUser()
 
       const { data: order, error } = await supabase.from('orders').insert({
-        buyer_id: user?.id || null,
-        total_amount: total,
-        vat_amount:   vat,
-        currency:     'ZAR',
-        payment_provider: method,
-        status:       'pending',
+        buyer_id:       user?.id || null,
+        buyer_name:     form.name,
+        buyer_email:    form.email,
+        subtotal,
+        discount,
+        vat_amount:     vat,
+        vat_rate:       15,
+        total,
+        currency:       'ZAR',
+        payment_method: method,
+        promotion_code: promoApplied ? promoCode.toUpperCase().trim() : null,
+        status:         'pending',
       }).select().single()
 
       if (error || !order) throw new Error('Failed to create order')
@@ -73,9 +79,9 @@ export default function CheckoutPage() {
           order_id:     order.id,
           book_id:      i.book.id,
           publisher_id: i.book.publisher_id,
+          title:        i.book.title,
+          cover_url:    i.book.cover_url,
           price:        i.book.price,
-          platform_commission: i.book.price * 0.2,
-          publisher_earnings:  i.book.price * 0.8,
         }))
       )
 

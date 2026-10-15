@@ -10,7 +10,7 @@ export default async function PublisherDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/publisher/dashboard')
 
-  const { data: publisher } = await supabase.from('publishers').select('*').eq('user_id', user.id).single()
+  const { data: publisher } = await supabase.from('publishers').select('*').eq('id', user.id).single()
   if (!publisher) redirect('/publisher/register')
 
   const { data: books } = await supabase
@@ -40,7 +40,7 @@ export default async function PublisherDashboardPage() {
     approved:  { label: 'Approved',      bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.3)',  color: '#4ade80' },
     pending:   { label: 'Under Review',  bg: 'rgba(234,179,8,0.12)',  border: 'rgba(234,179,8,0.3)',  color: '#facc15' },
     suspended: { label: 'Suspended',     bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.3)',  color: '#f87171' },
-  }[publisher.status] || { label: publisher.status, bg: 'var(--surface)', border: 'var(--border)', color: 'var(--text-muted)' }
+  }[publisher.status as 'approved' | 'pending' | 'suspended'] || { label: publisher.status, bg: 'var(--surface)', border: 'var(--border)', color: 'var(--text-muted)' }
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>

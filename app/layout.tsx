@@ -1,10 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Providers } from './providers'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://readify.co.za'),
   title: {
     default: 'Read.ify — South Africa\'s Ebook Marketplace',
     template: '%s | Read.ify',
@@ -30,6 +31,9 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   icons: { icon: '/logo-stacked.png', apple: '/logo-stacked.png' },
+}
+
+export const viewport: Viewport = {
   themeColor: '#f5a623',
 }
 

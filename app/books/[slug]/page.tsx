@@ -1,3 +1,4 @@
+import BookCard from '@/components/books/BookCard'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
