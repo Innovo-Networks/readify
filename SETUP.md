@@ -1,5 +1,23 @@
 # Readify — Setup Guide
 
+## Current state (15 October 2026)
+
+| Piece | Where |
+|---|---|
+| Code | `C:\Users\DamianMichael\readify` → GitHub **Innovonetworks/readify**, branch `main` |
+| Hosting | Vercel project **readify** (team Innovo Networks), production https://readify-iota.vercel.app |
+| Database / auth / storage | Supabase project **innovo's Project** (`fqoikovjipnjywzbnvpa`, eu-west-1); schema and buckets applied as migrations |
+| Payments | Stripe only. PayPal and Coinbase code exists but stays hidden until real keys are set (see `lib/payments.ts`) |
+
+Deploying: Vercel is not git-connected (the Hobby plan refuses private organisation repos), so release with
+`npx vercel deploy --prod --yes` from the project folder after `git push`.
+
+Still needed before real sales: `SUPABASE_SERVICE_ROLE_KEY` and the three Stripe keys on Vercel,
+the Stripe webhook pointing at `/api/stripe/webhook`, and published books in the database
+(the 67 seed titles are display-only and cannot be bought).
+
+The old copy under OneDrive (`SABEV CANS\Readify\readify`) is archived; do not edit or run it.
+
 ## Tech Stack
 - **Frontend/Backend**: Next.js 14 (App Router + TypeScript)
 - **Database + Auth + Storage**: Supabase

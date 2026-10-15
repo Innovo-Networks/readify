@@ -7,6 +7,8 @@ import { formatZAR } from '@/lib/utils'
 import { Star, BookOpen, Calendar, Globe, Hash, FileText, Download, ArrowLeft, ShieldCheck } from 'lucide-react'
 import type { Book, Review } from '@/types'
 import AddToCartButton from '@/components/books/AddToCartButton'
+import { SEED_BOOKS } from '@/lib/data/seed-books'
+import { isSeedBookId } from '@/lib/payments'
 
 async function getBook(slug: string): Promise<Book | null> {
   const supabase = await createClient()
@@ -16,10 +18,13 @@ async function getBook(slug: string): Promise<Book | null> {
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
-  return data as Book | null
+  if (data) return data as Book
+  // Fall back to the seed catalogue (same source /books uses while the database is empty)
+  return SEED_BOOKS.find((b) => b.slug === slug) ?? null
 }
 
 async function getReviews(bookId: string): Promise<Review[]> {
+  if (isSeedBookId(bookId)) return []
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
@@ -32,6 +37,9 @@ async function getReviews(bookId: string): Promise<Review[]> {
 
 async function getRelated(categoryId: string | null, currentId: string): Promise<Book[]> {
   if (!categoryId) return []
+  if (isSeedBookId(currentId)) {
+    return SEED_BOOKS.filter((b) => b.category_id === categoryId && b.id !== currentId).slice(0, 4)
+  }
   const supabase = await createClient()
   const { data } = await supabase
     .from('books')
@@ -273,7 +281,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-green-500" />
-                  Secure payment — Stripe, PayPal, or Crypto
+                  Secure card payment via Stripe
                 </div>
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-blue-500" />

@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
 import { Loader2, Eye, EyeOff, BookOpen, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function LoginForm() {
@@ -105,7 +106,8 @@ function LoginForm() {
             Sign in to access your library and downloads
           </p>
 
-          {/* Google OAuth */}
+          {/* Google OAuth (needs the provider enabled in Supabase + NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true) */}
+          {GOOGLE_AUTH_ENABLED && (<>
           <button
             onClick={handleGoogle}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border font-medium text-sm transition-all hover:opacity-90 mb-6"
@@ -130,6 +132,7 @@ function LoginForm() {
             <span className="text-xs" style={{ color: 'var(--text-subtle)' }}>or sign in with email</span>
             <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
           </div>
+          </>)}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

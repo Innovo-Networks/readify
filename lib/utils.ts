@@ -5,12 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Formatted by hand rather than Intl.NumberFormat: Node and browsers ship different
+// ICU data for en-ZA ("R 149.00" vs "R 149,00"), which caused React hydration errors.
+// Output follows SA convention: non-breaking space as thousands separator, comma decimals.
 export function formatZAR(amount: number): string {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-    minimumFractionDigits: 2,
-  }).format(amount)
+  const sign = amount < 0 ? '-' : ''
+  const [whole, cents] = Math.abs(amount).toFixed(2).split('.')
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return `${sign}R ${grouped},${cents}`
 }
 
 export function calculateVAT(amount: number, rate = 0.15): number {

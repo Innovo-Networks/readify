@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
 import { Loader2, Eye, EyeOff, BookOpen, ShoppingBag, Upload, Check, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function getPasswordStrength(password: string): { score: number; label: string; color: string } {
@@ -169,7 +170,8 @@ export default function RegisterPage() {
             Start reading and selling ebooks today
           </p>
 
-          {/* Google OAuth */}
+          {/* Google OAuth (needs the provider enabled in Supabase + NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true) */}
+          {GOOGLE_AUTH_ENABLED && (<>
           <button
             onClick={handleGoogle}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border font-medium text-sm transition-all hover:opacity-90 mb-6"
@@ -189,6 +191,7 @@ export default function RegisterPage() {
             <span className="text-xs" style={{ color: 'var(--text-subtle)' }}>or create with email</span>
             <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
           </div>
+          </>)}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Role selector */}

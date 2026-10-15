@@ -6,9 +6,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { formatZAR, calculateTotal, applyPromotion } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { ENABLED_PAYMENT_METHODS, isSeedBookId, type PaymentMethod } from '@/lib/payments'
 import { CreditCard, Bitcoin, ArrowLeft, Tag, Loader2, ShieldCheck, BookOpen, Wallet } from 'lucide-react'
-
-type PaymentMethod = 'stripe' | 'paypal' | 'coinbase'
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
@@ -57,6 +56,13 @@ export default function CheckoutPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      // Downloads are tied to an account, so guests sign in (or register) before paying.
+      if (!user) { router.push('/auth/login?redirect=/checkout'); return }
+
+      if (items.some((i) => isSeedBookId(i.book.id))) {
+        throw new Error('Demo catalogue titles cannot be purchased yet. Please choose a title published by a publisher.')
+      }
+
       const { data: order, error } = await supabase.from('orders').insert({
         buyer_id:       user?.id || null,
         buyer_name:     form.name,
@@ -74,7 +80,7 @@ export default function CheckoutPage() {
 
       if (error || !order) throw new Error('Failed to create order')
 
-      await supabase.from('order_items').insert(
+      const { error: itemsError } = await supabase.from('order_items').insert(
         items.map((i) => ({
           order_id:     order.id,
           book_id:      i.book.id,
@@ -84,31 +90,35 @@ export default function CheckoutPage() {
           price:        i.book.price,
         }))
       )
+      if (itemsError) throw new Error('Could not add the books to your order. Please try again.')
 
       if (method === 'stripe') {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: order.id, items: items.map((i) => ({ title: i.book.title, price: i.book.price, quantity: 1 })), buyerEmail: form.email }),
         })
-        const { url } = await res.json()
-        if (url) window.location.href = url
+        const data = await res.json()
+        if (!res.ok || !data.url) throw new Error(data.error || 'Card payment could not be started. Please try again later.')
+        window.location.href = data.url
       } else if (method === 'paypal') {
         const res = await fetch('/api/paypal/create-order', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: order.id, total }),
         })
-        const { approvalUrl } = await res.json()
-        if (approvalUrl) window.location.href = approvalUrl
+        const data = await res.json()
+        if (!res.ok || !data.approvalUrl) throw new Error(data.error || 'PayPal could not be started. Please try again later.')
+        window.location.href = data.approvalUrl
       } else if (method === 'coinbase') {
         const res = await fetch('/api/coinbase/create-charge', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: order.id, total, buyerName: form.name, buyerEmail: form.email, description: `Readify: ${items.length} ebook(s)` }),
         })
-        const { hostedUrl } = await res.json()
-        if (hostedUrl) window.location.href = hostedUrl
+        const data = await res.json()
+        if (!res.ok || !data.hostedUrl) throw new Error(data.error || 'Crypto payment could not be started. Please try again later.')
+        window.location.href = data.hostedUrl
       }
-    } catch (e) {
-      setErrors({ general: 'Something went wrong. Please try again.' })
+    } catch (e: any) {
+      setErrors({ general: e?.message || 'Something went wrong. Please try again.' })
     } finally {
       setLoading(false)
     }
@@ -200,7 +210,7 @@ export default function CheckoutPage() {
                   { id: 'stripe',   label: 'Credit / Debit Card',   sub: 'Visa, Mastercard · powered by Stripe', icon: CreditCard, badge: 'Most Popular', color: 'text-blue-400' },
                   { id: 'paypal',   label: 'PayPal',                sub: 'Pay with your PayPal account',        icon: Wallet,     badge: null,          color: 'text-blue-500' },
                   { id: 'coinbase', label: 'Cryptocurrency',         sub: 'Bitcoin, Ethereum, USDC and more',   icon: Bitcoin,    badge: 'New',         color: 'text-orange-400' },
-                ] as const).map((pm) => {
+                ] as const).filter((pm) => ENABLED_PAYMENT_METHODS.includes(pm.id)).map((pm) => {
                   const active = method === pm.id
                   const Icon   = pm.icon
                   return (

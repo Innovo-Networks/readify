@@ -8,6 +8,7 @@ import {
   CreditCard, Wallet, Download, CheckCircle,
 } from 'lucide-react'
 import type { Book } from '@/types'
+import { PAYPAL_ENABLED, COINBASE_ENABLED } from '@/lib/payments'
 
 async function getFeaturedBooks(): Promise<Book[]> {
   const supabase = await createClient()
@@ -360,21 +361,37 @@ export default async function HomePage() {
                 iconColor: '#60a5fa',
               },
               {
-                icon: Wallet,
-                title: 'PayPal',
-                desc: 'Pay securely with your PayPal balance or linked bank account. Buyer protection included.',
+                icon: ShieldCheck,
+                title: 'Card Details Never Stored',
+                desc: 'Checkout happens on Stripe\x27s PCI-certified page. Readify never sees or stores your card number.',
                 tag: 'Safe & Trusted',
                 tagColor: '#34d399',
                 iconColor: '#34d399',
               },
               {
                 icon: Globe,
-                title: 'EFT / Bank Transfer',
-                desc: 'Direct South African EFT via Peach Payments or direct bank transfer. All major SA banks.',
+                title: 'Priced in Rand',
+                desc: 'Every price is in ZAR with 15% VAT included, so what you see is what you pay.',
                 tag: 'Local SA',
                 tagColor: '#f5a623',
                 iconColor: '#f5a623',
               },
+              ...(PAYPAL_ENABLED ? [{
+                icon: Wallet,
+                title: 'PayPal',
+                desc: 'Pay securely with your PayPal balance or linked bank account. Buyer protection included.',
+                tag: 'Also Accepted',
+                tagColor: '#34d399',
+                iconColor: '#34d399',
+              }] : []),
+              ...(COINBASE_ENABLED ? [{
+                icon: Wallet,
+                title: 'Cryptocurrency',
+                desc: 'Bitcoin, Ethereum, USDC and more via Coinbase Commerce.',
+                tag: 'Also Accepted',
+                tagColor: '#f5a623',
+                iconColor: '#f5a623',
+              }] : []),
             ].map((p) => (
               <div key={p.title} className="card p-6 text-center">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -428,7 +445,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               { step: '01', icon: BookOpen,    title: 'Browse & Choose', desc: 'Explore thousands of ebooks across categories and find your next great read.' },
-              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely with card, PayPal, or EFT. 15% SA VAT included in all prices.' },
+              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely by card through Stripe. 15% SA VAT included in all prices.' },
               { step: '03', icon: Download,    title: 'Instant Download', desc: 'Get immediate access to your ebook. Download to any device, anytime.' },
             ].map((s) => (
               <div key={s.step} className="glass-card p-6 relative">
