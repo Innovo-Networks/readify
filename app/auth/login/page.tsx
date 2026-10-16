@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
+import { safeRedirect, withRedirect } from '@/lib/auth-redirect'
 import { Loader2, Eye, EyeOff, BookOpen, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/account'
+  const redirect = safeRedirect(searchParams.get('redirect'))
   const [form, setForm] = useState({ email: '', password: '' })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -29,7 +30,7 @@ function LoginForm() {
   const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}` },
+      options: { redirectTo: `${window.location.origin}${withRedirect('/auth/callback', redirect)}` },
     })
   }
 
@@ -195,7 +196,7 @@ function LoginForm() {
 
           <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>
             Don&apos;t have an account?{' '}
-            <Link href="/auth/register" className="text-gold-500 font-semibold hover:text-gold-400 transition-colors">
+            <Link href={withRedirect('/auth/register', redirect)} className="text-gold-500 font-semibold hover:text-gold-400 transition-colors">
               Create account
             </Link>
           </p>

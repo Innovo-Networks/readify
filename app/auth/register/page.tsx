@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
+import { safeRedirect, withRedirect } from '@/lib/auth-redirect'
 import { Loader2, Eye, EyeOff, BookOpen, ShoppingBag, Upload, Check, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function getPasswordStrength(password: string): { score: number; label: string; color: string } {
@@ -20,8 +21,11 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   return             { score, label: 'Strong', color: '#22c55e' }
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // Where to land once the account is confirmed (e.g. /checkout when sent here from the cart).
+  const redirect = safeRedirect(searchParams.get('redirect'))
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [role, setRole] = useState<'buyer' | 'publisher'>('buyer')
   const [showPw, setShowPw] = useState(false)
@@ -47,7 +51,7 @@ export default function RegisterPage() {
         data: { full_name: form.name, role },
         // Send the confirmation link back to whichever host the user signed up on
         // (production, a Vercel preview, or localhost) instead of the Supabase Site URL.
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}${withRedirect('/auth/callback', redirect)}`,
       },
     })
     if (error) { setError(error.message); setLoading(false); return }
@@ -57,7 +61,7 @@ export default function RegisterPage() {
   const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}${withRedirect('/auth/callback', redirect)}` },
     })
   }
 
@@ -79,7 +83,7 @@ export default function RegisterPage() {
             Click the link to activate your Readify account and start{' '}
             {role === 'publisher' ? 'selling ebooks' : 'reading'}.
           </p>
-          <Link href="/auth/login" className="btn-primary">
+          <Link href={withRedirect('/auth/login', redirect)} className="btn-primary">
             Go to Sign In
           </Link>
         </div>
@@ -323,12 +327,20 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-gold-500 font-semibold hover:text-gold-400 transition-colors">
+            <Link href={withRedirect('/auth/login', redirect)} className="text-gold-500 font-semibold hover:text-gold-400 transition-colors">
               Sign in
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   )
 }

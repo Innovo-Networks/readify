@@ -18,17 +18,22 @@ const CART_KEY = 'readify_cart'
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  // Save only once the stored cart has been read; otherwise the initial empty
+  // state (doubled by React Strict Mode in dev) overwrites it on every page load.
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(CART_KEY)
       if (stored) setItems(JSON.parse(stored))
     } catch {}
+    setHydrated(true)
   }, [])
 
   useEffect(() => {
+    if (!hydrated) return
     localStorage.setItem(CART_KEY, JSON.stringify(items))
-  }, [items])
+  }, [items, hydrated])
 
   const addItem = useCallback((book: Book) => {
     setItems((prev) => {

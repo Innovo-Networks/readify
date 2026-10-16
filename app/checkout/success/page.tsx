@@ -55,9 +55,9 @@ export default async function CheckoutSuccessPage({
         <div className="text-center mb-8">
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 animate-fade-in"
-            style={{ background: `rgba(,0.12)`, border: `2px solid rgba(,0.3)` }}
+            style={{ background: `rgba(${tone},0.12)`, border: `2px solid rgba(${tone},0.3)` }}
           >
-            <Icon className="w-12 h-12" style={{ color: `rgb()` }} />
+            <Icon className="w-12 h-12" style={{ color: `rgb(${tone})` }} />
           </div>
           <h1 className="font-display text-4xl font-bold mb-3" style={{ color: 'var(--text)' }}>
             {heading}
