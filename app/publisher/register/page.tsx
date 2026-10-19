@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
+  isValidVatNumber, isValidCipcNumber, isValidAccountNumber, isValidBranchCode,
+  documentError, documentExtension,
+} from '@/lib/publisher-validation'
+import {
   Loader2, Building2, Phone, Globe, MapPin, Hash, FileText, Check,
   BookOpen, Banknote, Upload, TrendingUp, Users,
 } from 'lucide-react'
@@ -30,6 +34,7 @@ export default function PublisherRegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [files, setFiles] = useState<{ cipc?: File; bank?: File; vat?: File }>({})
 
   const [form, setForm] = useState({
     company_name: '',
@@ -50,13 +55,63 @@ export default function PublisherRegisterPage() {
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }))
 
+  // Returns the first problem with the fields on a step, or null when the step is complete.
+  const validateStep = (s: number): string | null => {
+    if (s === 1) {
+      if (form.vat_number && !isValidVatNumber(form.vat_number)) return 'VAT number must be 10 digits starting with 4.'
+      if (!isValidCipcNumber(form.cipc_registration)) return 'CIPC number must look like 2023/123456/07.'
+      if (!files.cipc) return 'Upload your CIPC registration certificate.'
+      if (form.vat_number && !files.vat) return 'Upload your VAT registration letter.'
+    }
+    if (s === 3) {
+      if (!isValidAccountNumber(form.bank_account_number)) return 'Account number must be 6 to 16 digits.'
+      if (!isValidBranchCode(form.bank_branch_code)) return 'Branch code must be 6 digits.'
+      if (!files.bank) return 'Upload your bank letter.'
+    }
+    return null
+  }
+
+  const pickFile = (kind: 'cipc' | 'bank' | 'vat', file: File | undefined) => {
+    if (!file) return
+    const problem = documentError(file)
+    if (problem) { setError(problem); return }
+    setError('')
+    setFiles((f) => ({ ...f, [kind]: file }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const problem = validateStep(1) ?? validateStep(3)
+    if (problem) { setError(problem); return }
     setLoading(true)
     setError('')
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login?redirect=/publisher/register'); return }
+
+    // Documents are stored under <user id>/ in a private bucket, so only this publisher and admins can read them.
+    const uploadDocument = async (kind: string, file: File | undefined) => {
+      if (!file) return null
+      const path = `${user.id}/${kind}-${Date.now()}.${documentExtension(file.type)}`
+      const { error: uploadError } = await supabase.storage
+        .from('publisher-documents')
+        .upload(path, file, { contentType: file.type, upsert: false })
+      if (uploadError) throw uploadError
+      return path
+    }
+
+    let documentPaths: { cipc: string | null; bank: string | null; vat: string | null }
+    try {
+      documentPaths = {
+        cipc: await uploadDocument('cipc', files.cipc),
+        bank: await uploadDocument('bank', files.bank),
+        vat: await uploadDocument('vat', files.vat),
+      }
+    } catch {
+      setError('We could not upload your documents. Please try again.')
+      setLoading(false)
+      return
+    }
 
     await supabase.from('profiles').update({ role: 'publisher' }).eq('id', user.id)
 
@@ -76,6 +131,9 @@ export default function PublisherRegisterPage() {
       bank_name: form.bank_name,
       bank_account_number: form.bank_account_number,
       bank_account_type: form.bank_account_type,
+      cipc_document_path: documentPaths.cipc,
+      bank_letter_path: documentPaths.bank,
+      vat_letter_path: documentPaths.vat,
       bank_branch_code: form.bank_branch_code,
       status: 'pending',
     }, { onConflict: 'id', ignoreDuplicates: false })
@@ -184,7 +242,12 @@ export default function PublisherRegisterPage() {
 
       {/* Form */}
       <div className="page-container max-w-3xl py-10">
-        <form onSubmit={step < 3 ? (e) => { e.preventDefault(); setStep(step + 1) } : handleSubmit}>
+        {error && (
+          <div className="rounded-xl px-4 py-3 mb-6 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
+            {error}
+          </div>
+        )}
+        <form onSubmit={step < 3 ? (e) => { e.preventDefault(); const problem = validateStep(step); setError(problem ?? ''); if (!problem) setStep(step + 1) } : handleSubmit}>
 
           {/* Step 1: Business Info */}
           {step === 1 && (
@@ -219,11 +282,32 @@ export default function PublisherRegisterPage() {
                 <div>
                   <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                     <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-gold-500" /> CIPC Number</span>
-                    <span className="text-xs font-normal ml-1" style={{ color: 'var(--text-subtle)' }}>(optional)</span>
+                    <span style={{ color: '#f87171' }}> *</span>
                   </label>
                   <input className="input font-mono" placeholder="2023/123456/07" value={form.cipc_registration}
                     onChange={(e) => update('cipc_registration', e.target.value)} />
                   <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>Companies & Intellectual Property Commission</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    CIPC Registration Certificate <span style={{ color: '#f87171' }}>*</span>
+                  </label>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm"
+                    onChange={(e) => pickFile('cipc', e.target.files?.[0])} />
+                  {files.cipc && <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>{files.cipc.name}</p>}
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>PDF, JPG or PNG, up to 5 MB</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    VAT Registration Letter
+                    <span className="text-xs font-normal ml-1" style={{ color: 'var(--text-subtle)' }}>(required with a VAT number)</span>
+                  </label>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm"
+                    onChange={(e) => pickFile('vat', e.target.files?.[0])} />
+                  {files.vat && <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>{files.vat.name}</p>}
                 </div>
               </div>
 
@@ -380,11 +464,18 @@ export default function PublisherRegisterPage() {
                 </p>
               </div>
 
-              {error && (
-                <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
-                  {error}
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                  Bank Letter <span style={{ color: '#f87171' }}>*</span>
+                </label>
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm"
+                  onChange={(e) => pickFile('bank', e.target.files?.[0])} />
+                {files.bank && <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>{files.bank.name}</p>}
+                <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>
+                  A bank letter or recent statement showing the account holder name, account number and branch code.
+                  PDF, JPG or PNG, up to 5 MB.
+                </p>
+              </div>
 
               <div
                 className="rounded-xl p-4 text-xs flex items-center gap-2"

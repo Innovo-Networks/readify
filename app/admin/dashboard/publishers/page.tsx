@@ -42,6 +42,20 @@ export default async function AdminPublishersPage({
     .eq('status', filter)
     .order('created_at', { ascending: false })
 
+  // Verification documents are private. Short-lived links let the admin open them for review.
+  const sign = async (path: string | null) =>
+    path ? (await supabase.storage.from('publisher-documents').createSignedUrl(path, 300)).data?.signedUrl ?? null : null
+  const withDocs = await Promise.all(
+    ((publishers ?? []) as any[]).map(async (pub) => ({
+      ...pub,
+      docs: {
+        cipc: await sign(pub.cipc_document_path),
+        bank: await sign(pub.bank_letter_path),
+        vat: await sign(pub.vat_letter_path),
+      },
+    }))
+  )
+
   const { data: counts } = await supabase.from('publishers').select('status')
   const statusCounts = (counts || []).reduce((acc: Record<string, number>, p: any) => {
     acc[p.status] = (acc[p.status] || 0) + 1
@@ -90,7 +104,7 @@ export default async function AdminPublishersPage({
           </div>
         ) : (
           <div className="space-y-4">
-            {(publishers as any[]).map((pub) => (
+            {withDocs.map((pub) => (
               <div key={pub.id} className="card p-6">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                   <div className="flex-1">
@@ -111,6 +125,9 @@ export default async function AdminPublishersPage({
                         { label: 'CIPC Registration', value: pub.cipc_registration || '—' },
                         { label: 'City', value: `${pub.city || '—'}, ${pub.province || '—'}` },
                         { label: 'Postal Code', value: pub.postal_code || '—' },
+                        { label: 'Bank', value: pub.bank_name ? `${pub.bank_name} (${pub.bank_account_type || '—'})` : '—' },
+                        { label: 'Account Number', value: pub.bank_account_number || '—' },
+                        { label: 'Branch Code', value: pub.bank_branch_code || '—' },
                         { label: 'Applied', value: new Date(pub.created_at).toLocaleDateString('en-ZA') },
                       ].map((item) => (
                         <div key={item.label}>
@@ -119,6 +136,30 @@ export default async function AdminPublishersPage({
                         </div>
                       ))}
                     </dl>
+
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-400 mb-2">
+                        Verification documents (links expire after 5 minutes; reload to open again)
+                      </p>
+                      <div className="flex flex-wrap gap-2 text-sm">
+                        {[
+                          { label: 'CIPC certificate', url: pub.docs.cipc },
+                          { label: 'Bank letter', url: pub.docs.bank },
+                          { label: 'VAT letter', url: pub.docs.vat },
+                        ].map((doc) =>
+                          doc.url ? (
+                            <a key={doc.label} href={doc.url} target="_blank" rel="noreferrer"
+                              className="px-3 py-1.5 rounded-lg bg-brand-50 text-brand-700 hover:bg-brand-100 font-medium">
+                              {doc.label} ↗
+                            </a>
+                          ) : (
+                            <span key={doc.label} className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400">
+                              {doc.label}: not uploaded
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
 
                     {pub.bio && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-lg">
