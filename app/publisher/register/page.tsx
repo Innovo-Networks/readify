@@ -60,24 +60,25 @@ export default function PublisherRegisterPage() {
 
     await supabase.from('profiles').update({ role: 'publisher' }).eq('id', user.id)
 
+    // publishers.id is the profile id (see supabase/schema.sql), and the columns match that schema.
     const { error: pubError } = await supabase.from('publishers').upsert({
-      user_id: user.id,
+      id: user.id,
       company_name: form.company_name,
       vat_number: form.vat_number || null,
-      cipc_registration_number: form.cipc_registration || null,
+      cipc_registration: form.cipc_registration || null,
       physical_address: form.physical_address,
       city: form.city,
       province: form.province,
       postal_code: form.postal_code,
-      contact_phone: form.phone,
-      contact_email: null,
-      website_url: form.website || null,
+      phone: form.phone || null,
+      website: form.website || null,
       bio: form.bio || null,
       bank_name: form.bank_name,
       bank_account_number: form.bank_account_number,
+      bank_account_type: form.bank_account_type,
       bank_branch_code: form.bank_branch_code,
       status: 'pending',
-    })
+    }, { onConflict: 'id', ignoreDuplicates: false })
 
     if (pubError) { setError(pubError.message); setLoading(false); return }
     setSuccess(true)
