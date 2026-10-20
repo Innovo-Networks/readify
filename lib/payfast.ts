@@ -114,7 +114,12 @@ export function checkItn({ data, passphrase, expectedMerchantId, expectedAmount 
   const received = map['signature']
   if (!received) return { ok: false, reason: 'missing signature' }
 
-  const expected = payfastSignature(data.filter(([k]) => k !== 'signature'), passphrase)
+  // ITNs are signed over every field PayFast sent, including empty ones (custom_* etc.).
+  const parts = data
+    .filter(([k]) => k !== 'signature')
+    .map(([k, v]) => `${k}=${payfastEncode(v)}`)
+  if (passphrase) parts.push(`passphrase=${payfastEncode(passphrase)}`)
+  const expected = createHash('md5').update(parts.join('&')).digest('hex')
   if (expected !== received) return { ok: false, reason: 'signature mismatch' }
 
   if (map['merchant_id'] !== expectedMerchantId) return { ok: false, reason: 'merchant_id mismatch' }

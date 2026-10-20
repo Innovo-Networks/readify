@@ -1,7 +1,6 @@
-import { createHash } from 'crypto'
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { checkItn, parseFormBody, payfastConfig, payfastEncode, payfastSignature, validateItnWithPayfast } from '@/lib/payfast'
+import { checkItn, parseFormBody, payfastConfig, validateItnWithPayfast } from '@/lib/payfast'
 import { fulfillPaidOrder, markOrderFailed } from '@/lib/fulfillment'
 
 /**
@@ -41,33 +40,6 @@ export async function POST(request: Request) {
   })
   if (!check.ok) {
     console.warn('PayFast ITN rejected:', check.reason, 'order', orderId)
-    if (check.reason === 'signature mismatch') {
-      // Diagnostic only: field names, both signatures, passphrase length, and non-personal values.
-      const unsigned = data.filter(([k]) => k !== 'signature')
-      const expectedSig = payfastSignature(unsigned, config.passphrase)
-      const passSuffix = `passphrase=${payfastEncode(config.passphrase)}`
-      const md5 = (s: string) => createHash('md5').update(s).digest('hex')
-      // Variant A: raw body text exactly as PayFast sent it (signature removed), with and without empty fields.
-      const rawParts = body.split('&').filter((p) => !p.startsWith('signature='))
-      const rawAllSig = md5([...rawParts, passSuffix].join('&'))
-      const rawNoEmptySig = md5([...rawParts.filter((p) => !p.endsWith('=')), passSuffix].join('&'))
-      // Variant B: decoded values encoded with encodeURIComponent (spaces as %20, not +).
-      const pctParts = unsigned.filter(([, v]) => v !== '').map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-      const pctSig = md5([...pctParts, `passphrase=${encodeURIComponent(config.passphrase)}`].join('&'))
-      console.warn('PayFast ITN signature variants', JSON.stringify({
-        rawAllMatches: rawAllSig === map['signature'],
-        rawNoEmptyMatches: rawNoEmptySig === map['signature'],
-        pctMatches: pctSig === map['signature'],
-      }))
-      const safe = ['merchant_id', 'payment_status', 'amount_gross', 'item_name', 'm_payment_id', 'pf_payment_id']
-      console.warn('PayFast ITN signature debug', JSON.stringify({
-        keys: data.map(([k]) => k),
-        received: map['signature'],
-        expected: expectedSig,
-        passphraseLength: config.passphrase.length,
-        values: Object.fromEntries(unsigned.filter(([k]) => safe.includes(k)).map(([k, v]) => [k, payfastEncode(v)])),
-      }))
-    }
     return new NextResponse(`rejected: ${check.reason}`, { status: 200 })
   }
 
