@@ -28,11 +28,15 @@ export function payfastConfig() {
   }
 }
 
-/** PayFast-style URL encoding: like encodeURIComponent, but spaces become '+' and hex is upper-case. */
+/**
+ * PayFast-style URL encoding, matching PHP's urlencode (which PayFast signs with):
+ * everything except A-Z a-z 0-9 - _ . is percent-encoded, spaces become '+'.
+ * Values are not trimmed, so the signed text matches the text sent.
+ */
 export function payfastEncode(value: string): string {
-  return encodeURIComponent(value.trim())
+  return encodeURIComponent(value)
+    .replace(/[!'()*~]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase())
     .replace(/%20/g, '+')
-    .replace(/%[0-9a-f]{2}/g, (m) => m.toUpperCase())
 }
 
 /**
