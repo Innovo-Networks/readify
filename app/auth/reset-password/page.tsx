@@ -14,15 +14,39 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('')
   const [ready, setReady] = useState(false)
   const [done, setDone] = useState(false)
+  // Email links carry a one-time token_hash. It is used only after the user taps
+  // Continue, so email scanners that pre-open the link cannot consume it.
+  const [tokenHash, setTokenHash] = useState<string | null>(null)
+  const [checked, setChecked] = useState(false)
 
-  // The reset link signs the user in with a recovery session; wait for it.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setReady(!!data.session))
+    const hash = new URLSearchParams(window.location.search).get('token_hash')
+    if (hash) {
+      setTokenHash(hash)
+      setChecked(true)
+      return
+    }
+    supabase.auth.getSession().then(({ data }) => {
+      setReady(!!data.session)
+      setChecked(true)
+    })
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' || session) setReady(true)
     })
     return () => sub.subscription.unsubscribe()
   }, [supabase])
+
+  const handleContinue = async () => {
+    if (!tokenHash) return
+    setLoading(true)
+    setError('')
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' })
+    setLoading(false)
+    if (error) { setError(error.message); setTokenHash(null); return }
+    setTokenHash(null)
+    setReady(true)
+    router.replace('/auth/reset-password')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +75,22 @@ export default function ResetPasswordPage() {
 
         {done ? (
           <p className="text-sm mt-4" style={{ color: 'var(--text-muted)' }}>Your password has been updated. Taking you to your account…</p>
+        ) : !checked ? (
+          <div className="mt-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-gold-500" /></div>
+        ) : tokenHash && !ready ? (
+          <div className="mt-8 space-y-4">
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Tap continue to set your new password.</p>
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <button
+              onClick={handleContinue}
+              disabled={loading}
+              className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #f5a623, #d4861a)', color: '#0a0a0a' }}
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Continue
+            </button>
+          </div>
         ) : !ready ? (
           <p className="text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
             This reset link is invalid or has expired. <Link href="/auth/forgot-password" className="text-gold-500">Request a new one</Link>.
