@@ -142,10 +142,8 @@ export default async function PublisherDashboardPage() {
                   {books.slice(0, 6).map((book: Book) => (
                     <div
                       key={book.id}
-                      className="flex items-center gap-4 p-4 transition-colors"
+                      className="flex items-center gap-4 p-4 transition-colors hover:bg-white/[0.02]"
                       style={{ borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
                       <div
                         className="w-10 h-12 rounded-lg shrink-0 flex items-center justify-center"
