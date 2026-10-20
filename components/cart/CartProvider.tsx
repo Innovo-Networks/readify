@@ -46,7 +46,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((i) => i.book.id !== bookId))
   }, [])
 
-  const clearCart = useCallback(() => setItems([]), [])
+  // Also remove the stored cart: the provider reloads it on mount, and a child's
+  // clear runs before that reload, so the saved copy must be gone too.
+  const clearCart = useCallback(() => {
+    setItems([])
+    try { localStorage.removeItem(CART_KEY) } catch {}
+  }, [])
 
   const isInCart = useCallback(
     (bookId: string) => items.some((i) => i.book.id === bookId),
