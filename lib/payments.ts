@@ -1,7 +1,7 @@
 /**
  * Which optional integrations are switched on, derived from public env vars so
  * the same values work on the server, in the browser and in Vercel previews.
- * Stripe is always on; the others stay hidden until real credentials exist.
+ * PayFast and Stripe are switched on by their own flags; the others stay hidden until real credentials exist.
  */
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''
 
@@ -15,11 +15,14 @@ export const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED =
 // PayFast (South Africa): card, Instant EFT, SnapScan, Zapper, Mobicred. Listed first when on.
 export const PAYFAST_ENABLED = process.env.NEXT_PUBLIC_PAYFAST_ENABLED === 'true'
 
+// Stripe is off unless explicitly switched on (the store is PayFast-only at launch).
+export const STRIPE_ENABLED = process.env.NEXT_PUBLIC_STRIPE_ENABLED === 'true'
+
 export type PaymentMethod = 'payfast' | 'stripe' | 'paypal' | 'coinbase'
 
 export const ENABLED_PAYMENT_METHODS: readonly PaymentMethod[] = [
   ...(PAYFAST_ENABLED ? (['payfast'] as const) : []),
-  'stripe',
+  ...(STRIPE_ENABLED ? (['stripe'] as const) : []),
   ...(PAYPAL_ENABLED ? (['paypal'] as const) : []),
   ...(COINBASE_ENABLED ? (['coinbase'] as const) : []),
 ]
