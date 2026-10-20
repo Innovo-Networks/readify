@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import ClearCartOnPaid from '@/components/cart/ClearCartOnPaid'
 import { Check, Clock, X, Download, BookOpen, ArrowRight, Library } from 'lucide-react'
 
 export default async function CheckoutSuccessPage({
@@ -50,6 +51,7 @@ export default async function CheckoutSuccessPage({
       className="min-h-screen flex items-center justify-center px-6 py-16"
       style={{ background: 'var(--bg)' }}
     >
+      {paid && <ClearCartOnPaid />}
       <div className="max-w-lg w-full">
         {/* Status icon */}
         <div className="text-center mb-8">
