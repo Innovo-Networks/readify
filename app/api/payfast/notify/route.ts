@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { checkItn, parseFormBody, payfastConfig, validateItnWithPayfast } from '@/lib/payfast'
+import { checkItn, parseFormBody, payfastConfig, payfastEncode, payfastSignature, validateItnWithPayfast } from '@/lib/payfast'
 import { fulfillPaidOrder, markOrderFailed } from '@/lib/fulfillment'
 
 /**
@@ -40,6 +40,19 @@ export async function POST(request: Request) {
   })
   if (!check.ok) {
     console.warn('PayFast ITN rejected:', check.reason, 'order', orderId)
+    if (check.reason === 'signature mismatch') {
+      // Diagnostic only: field names, both signatures, passphrase length, and non-personal values.
+      const unsigned = data.filter(([k]) => k !== 'signature')
+      const expectedSig = payfastSignature(unsigned, config.passphrase)
+      const safe = ['merchant_id', 'payment_status', 'amount_gross', 'item_name', 'm_payment_id', 'pf_payment_id']
+      console.warn('PayFast ITN signature debug', JSON.stringify({
+        keys: data.map(([k]) => k),
+        received: map['signature'],
+        expected: expectedSig,
+        passphraseLength: config.passphrase.length,
+        values: Object.fromEntries(unsigned.filter(([k]) => safe.includes(k)).map(([k, v]) => [k, payfastEncode(v)])),
+      }))
+    }
     return new NextResponse(`rejected: ${check.reason}`, { status: 200 })
   }
 
