@@ -44,7 +44,7 @@ export default async function AdminPublishersPage({
 
   // Verification documents are private. Short-lived links let the admin open them for review.
   const sign = async (path: string | null) =>
-    path ? (await supabase.storage.from('publisher-documents').createSignedUrl(path, 300)).data?.signedUrl ?? null : null
+    path ? (await supabase.storage.from('publisher-documents').createSignedUrl(path, 600)).data?.signedUrl ?? null : null
   const withDocs = await Promise.all(
     ((publishers ?? []) as any[]).map(async (pub) => ({
       ...pub,
@@ -139,7 +139,7 @@ export default async function AdminPublishersPage({
 
                     <div className="mt-4">
                       <p className="text-xs text-gray-400 mb-2">
-                        Verification documents (links expire after 5 minutes; reload to open again)
+                        Verification documents (links expire after 10 minutes; reload to open again)
                       </p>
                       <div className="flex flex-wrap gap-2 text-sm">
                         {[
