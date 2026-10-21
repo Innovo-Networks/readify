@@ -12,15 +12,8 @@ export default function Footer() {
           {/* ── Brand ── */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3 mb-5 group">
-              <div className="relative overflow-hidden rounded-xl shrink-0" style={{ width: 48, height: 48 }}>
-                <Image
-                  src="/logo-stacked-dark.png"
-                  alt="Read.ify logo"
-                  width={116}
-                  height={163}
-                  style={{ position: 'absolute', top: -30, left: -30 }}
-                  className="group-hover:scale-105 transition-transform duration-300"
-                />
+              <div className="relative shrink-0 group-hover:scale-105 transition-transform duration-300" style={{ width: 48, height: 48 }}>
+                <Image src="/logo-mark-dark.png" alt="Read.ify logo" fill sizes="48px" className="object-contain" />
               </div>
               <span className="font-extrabold text-2xl tracking-tight font-display">
                 <span className="text-white">Read</span>
