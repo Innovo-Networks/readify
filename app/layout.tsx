@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     images: ['/logo-dark.png'],
   },
   robots: { index: true, follow: true },
-  icons: { icon: '/logo-stacked.png', apple: '/logo-stacked.png' },
+  icons: { icon: '/logo-mark-light.png', apple: '/logo-mark-light.png' },
 }
 
 export const viewport: Viewport = {

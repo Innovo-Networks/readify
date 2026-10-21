@@ -100,16 +100,9 @@ export default async function HomePage() {
 
             {/* Logo lockup */}
             <div className="mb-10 animate-fade-in">
-              <div className="relative overflow-hidden rounded-2xl inline-block shadow-[0_0_40px_rgba(245,166,35,0.2)]"
-                style={{ width: 180, height: 100 }}>
-                <Image
-                  src="/logo-stacked-dark.png"
-                  alt="Read.ify"
-                  width={200}
-                  height={281}
-                  style={{ position: 'absolute', top: -52, left: 0 }}
-                  priority
-                />
+              <div className="relative rounded-2xl inline-block shadow-[0_0_40px_rgba(245,166,35,0.2)] p-3"
+                style={{ width: 120, height: 120 }}>
+                <Image src="/logo-mark-dark.png" alt="Read.ify" fill sizes="120px" className="object-contain p-3" priority />
               </div>
             </div>
 
