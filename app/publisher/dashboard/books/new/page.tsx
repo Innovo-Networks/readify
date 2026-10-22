@@ -122,7 +122,7 @@ export default function NewBookPage() {
       const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean)
 
       setUploadProgress('Saving book details…')
-      const { error: bookErr } = await supabase.from('books').insert({
+      const { data: newBook, error: bookErr } = await supabase.from('books').insert({
         publisher_id:  publisher.id,
         category_id:   cat?.id || null,
         title:         form.title,
@@ -141,9 +141,16 @@ export default function NewBookPage() {
         status:        form.status,
         tags,
         currency:      'ZAR',
-      })
+      }).select('id').single()
 
       if (bookErr) throw new Error(bookErr.message)
+      if (newBook?.id) {
+        fetch('/api/notify/book-uploaded', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ bookId: newBook.id }),
+        }).catch(() => {})
+      }
       router.push('/publisher/dashboard')
     } catch (e: any) {
       setError(e.message)

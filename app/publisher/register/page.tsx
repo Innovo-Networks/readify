@@ -139,6 +139,7 @@ export default function PublisherRegisterPage() {
     }, { onConflict: 'id', ignoreDuplicates: false })
 
     if (pubError) { setError(pubError.message); setLoading(false); return }
+    fetch('/api/notify/publisher-application', { method: 'POST' }).catch(() => {})
     setSuccess(true)
     setLoading(false)
   }
