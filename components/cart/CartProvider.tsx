@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { Book, CartItem } from '@/types'
+import { createClient } from '@/lib/supabase/client'
 
 interface CartContextType {
   items: CartItem[]
@@ -14,26 +15,55 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null)
 
-const CART_KEY = 'readify_cart'
+// Each account has its own cart, so accounts sharing a browser never see each other's items.
+// Signed-out visitors use the "guest" cart.
+const CART_KEY_PREFIX = 'readify_cart:'
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  // undefined = not checked yet, null = signed out, string = signed-in user id
+  const [userId, setUserId] = useState<string | null | undefined>(undefined)
   const [items, setItems] = useState<CartItem[]>([])
-  // Save only once the stored cart has been read; otherwise the initial empty
-  // state (doubled by React Strict Mode in dev) overwrites it on every page load.
-  const [hydrated, setHydrated] = useState(false)
+  // The storage key the current `items` belong to. Saving waits until this matches,
+  // so one account's items are never written into another account's cart.
+  const [itemsKey, setItemsKey] = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CART_KEY)
-      if (stored) setItems(JSON.parse(stored))
-    } catch {}
-    setHydrated(true)
+    const supabase = createClient()
+    let active = true
+    supabase.auth.getUser().then(({ data }) => {
+      if (active) setUserId(data.user?.id ?? null)
+    })
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null)
+    })
+    return () => {
+      active = false
+      subscription.subscription.unsubscribe()
+    }
   }, [])
 
+  const storageKey = userId === undefined ? null : `${CART_KEY_PREFIX}${userId ?? 'guest'}`
+
+  // Load the cart for the current account whenever it changes (sign in, sign out, switch account).
   useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(CART_KEY, JSON.stringify(items))
-  }, [items, hydrated])
+    if (!storageKey) return
+    // Remove the old shared cart that every account used to read from.
+    try { localStorage.removeItem('readify_cart') } catch {}
+    let loaded: CartItem[] = []
+    try {
+      const stored = localStorage.getItem(storageKey)
+      if (stored) loaded = JSON.parse(stored)
+    } catch {}
+    setItems(loaded)
+    setItemsKey(storageKey)
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!storageKey || itemsKey !== storageKey) return
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(items))
+    } catch {}
+  }, [items, itemsKey, storageKey])
 
   const addItem = useCallback((book: Book) => {
     setItems((prev) => {
@@ -46,12 +76,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((i) => i.book.id !== bookId))
   }, [])
 
-  // Also remove the stored cart: the provider reloads it on mount, and a child's
-  // clear runs before that reload, so the saved copy must be gone too.
+  // Also remove the stored copy so the cart stays empty after a reload.
   const clearCart = useCallback(() => {
     setItems([])
-    try { localStorage.removeItem(CART_KEY) } catch {}
-  }, [])
+    if (storageKey) {
+      try { localStorage.removeItem(storageKey) } catch {}
+    }
+  }, [storageKey])
 
   const isInCart = useCallback(
     (bookId: string) => items.some((i) => i.book.id === bookId),
