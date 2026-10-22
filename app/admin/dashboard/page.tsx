@@ -49,6 +49,9 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/dashboard/books" className="btn-secondary text-sm py-2">
               Books
             </Link>
+            <Link href="/admin/dashboard/reports" className="btn-secondary text-sm py-2">
+              Reports
+            </Link>
           </div>
         </div>
       </div>
