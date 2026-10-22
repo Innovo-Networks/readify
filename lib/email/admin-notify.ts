@@ -21,8 +21,14 @@ function escapeHtml(value: string): string {
 }
 
 export async function sendAdminEmail(email: AdminEmail, options: { replyTo?: string | null } = {}): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY
   const to = process.env.ADMIN_NOTIFY_EMAIL || process.env.BOOK_REPORT_NOTIFY_EMAIL
+  if (!to) return false
+  return sendEmailTo(to, email, options)
+}
+
+// Sends to any address. Used for admin alerts and for publisher sale emails.
+export async function sendEmailTo(to: string, email: AdminEmail, options: { replyTo?: string | null } = {}): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY
   if (!apiKey || !to) return false
 
   const from = process.env.BOOK_REPORT_FROM_EMAIL || 'Readify <onboarding@resend.dev>'

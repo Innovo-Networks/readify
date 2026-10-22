@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { generateDownloadToken } from '@/lib/utils'
-import { sendAdminEmail } from '@/lib/email/admin-notify'
+import { sendAdminEmail, sendEmailTo } from '@/lib/email/admin-notify'
 
 const MAX_DOWNLOADS = 5
 const DOWNLOAD_VALIDITY_MS = 365 * 24 * 60 * 60 * 1000 // 1 year
@@ -32,7 +32,7 @@ export async function fulfillPaidOrder({ orderId, paymentId }: { orderId: string
 
   const { data: items } = await supabase
     .from('order_items')
-    .select('id, book_id, price, books(title)')
+    .select('id, book_id, price, books(title, publisher_id)')
     .eq('order_id', orderId)
 
   for (const item of items || []) {
@@ -52,21 +52,72 @@ export async function fulfillPaidOrder({ orderId, paymentId }: { orderId: string
 
   if (previous?.status !== 'paid') {
     await notifyAdminOfSale(orderId, order, items || [])
+    await notifyPublishersOfSale(orderId, items || [])
   }
 
   return true
 }
 
+type SoldItem = {
+  price: number | string
+  books?: { title: string; publisher_id: string } | { title: string; publisher_id: string }[] | null
+}
+
+function bookOf(item: SoldItem) {
+  return Array.isArray(item.books) ? item.books[0] : item.books
+}
+
+// One email per publisher, listing only their books from this order.
+async function notifyPublishersOfSale(orderId: string, items: SoldItem[]) {
+  try {
+    const byPublisher = new Map<string, SoldItem[]>()
+    for (const item of items) {
+      const publisherId = bookOf(item)?.publisher_id
+      if (!publisherId) continue
+      byPublisher.set(publisherId, [...(byPublisher.get(publisherId) || []), item])
+    }
+    if (byPublisher.size === 0) return
+
+    const supabase = await createAdminClient()
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .in('id', Array.from(byPublisher.keys()))
+
+    for (const profile of profiles || []) {
+      if (!profile.email) continue
+      const sold = byPublisher.get(profile.id) || []
+      const total = sold.reduce((sum, item) => sum + Number(item.price), 0)
+      await sendEmailTo(profile.email, {
+        subject: sold.length === 1
+          ? `Your book sold on Readify: ${bookOf(sold[0])?.title ?? 'a book'}`
+          : `${sold.length} of your books sold on Readify`,
+        heading: sold.length === 1
+          ? 'One of your books has just been bought on Readify.'
+          : 'Some of your books have just been bought on Readify.',
+        rows: [
+          ...sold.map((item): [string, string] => [
+            bookOf(item)?.title ?? 'Book',
+            `R${Number(item.price).toFixed(2)}`,
+          ]),
+          ['Total for your books', `R${total.toFixed(2)}`],
+          ['Order', orderId],
+        ],
+        link: { href: '/publisher/dashboard', label: 'View your dashboard' },
+      })
+    }
+  } catch (error) {
+    console.error('Publisher sale email failed', error)
+  }
+}
+
 async function notifyAdminOfSale(
   orderId: string,
   order: { total: number | string; buyer_name: string | null; buyer_email: string; payment_method: string | null },
-  items: { price: number | string; books?: { title: string } | { title: string }[] | null }[],
+  items: SoldItem[],
 ) {
   try {
-    const titles = items.map((item) => {
-      const book = Array.isArray(item.books) ? item.books[0] : item.books
-      return `${book?.title ?? 'Unknown book'} (R${Number(item.price).toFixed(2)})`
-    })
+    const titles = items.map((item) => `${bookOf(item)?.title ?? 'Unknown book'} (R${Number(item.price).toFixed(2)})`)
     await sendAdminEmail({
       subject: `New sale: R${Number(order.total).toFixed(2)}`,
       heading: 'A book was purchased on Readify.',
