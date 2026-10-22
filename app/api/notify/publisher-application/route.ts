@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendAdminEmail } from '@/lib/email/admin-notify'
+import { sendAdminEmail, sendEmailTo } from '@/lib/email/admin-notify'
 
 // Called by the publisher registration page after the application is saved.
 // Only the signed-in applicant can trigger it, and it only reads their own publisher record.
@@ -30,8 +30,20 @@ export async function POST() {
       ],
       link: { href: '/admin/dashboard/publishers', label: 'Review applications' },
     },
-    { replyTo: user.email },
   )
+
+  // Confirm receipt to the applicant, from Readify (not the support helpdesk).
+  if (user.email) {
+    await sendEmailTo(user.email, {
+      subject: 'We have received your Readify publisher application',
+      heading: 'Thanks for applying to sell on Readify.',
+      rows: [
+        ['Company', publisher.company_name],
+        ['Status', 'Pending review'],
+        ['What next', 'Our team will review your application and contact you once it is approved.'],
+      ],
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }
