@@ -30,7 +30,6 @@ export async function POST() {
       ],
       link: { href: '/admin/dashboard/publishers', label: 'Review applications' },
     },
-    { replyTo: user.email },
   )
 
   return NextResponse.json({ ok: true })

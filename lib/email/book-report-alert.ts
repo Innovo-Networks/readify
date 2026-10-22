@@ -30,6 +30,5 @@ export async function sendBookReportAlert(report: BookReportAlert): Promise<bool
       ],
       link: { href: '/admin/dashboard/reports', label: 'Review in the admin portal' },
     },
-    { replyTo: report.reporterEmail },
   )
 }
