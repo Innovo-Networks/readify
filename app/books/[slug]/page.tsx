@@ -7,6 +7,7 @@ import { formatZAR } from '@/lib/utils'
 import { Star, BookOpen, Calendar, Globe, Hash, FileText, Download, ArrowLeft, ShieldCheck } from 'lucide-react'
 import type { Book, Review } from '@/types'
 import AddToCartButton from '@/components/books/AddToCartButton'
+import ReportBookForm from '@/components/books/ReportBookForm'
 import { SEED_BOOKS } from '@/lib/data/seed-books'
 import { isSeedBookId } from '@/lib/payments'
 
@@ -202,6 +203,13 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
                     <p key={i} className="mb-3">{p}</p>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Report */}
+            {!isSeedBookId(book.id) && (
+              <div className="mt-10">
+                <ReportBookForm bookId={book.id} />
               </div>
             )}
 
