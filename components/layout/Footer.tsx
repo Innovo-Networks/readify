@@ -28,19 +28,19 @@ export default function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gold-500 shrink-0" />
-                <a href="mailto:hello@readify.co.za" className="hover:text-white transition-colors">
-                  hello@readify.co.za
+                <a href="mailto:support@innovonet.co.za" className="hover:text-white transition-colors">
+                  support@innovonet.co.za
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold-500 shrink-0" />
-                <a href="tel:+27800000000" className="hover:text-white transition-colors">
-                  +27 (0) 80 000 0000
+                <a href="tel:+27218113333" className="hover:text-white transition-colors">
+                  021 811 3333
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-gold-500 shrink-0" />
-                <span>Johannesburg, South Africa</span>
+                <span>Century City, Cape Town</span>
               </div>
             </div>
           </div>
