@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { ArrowLeft, Check, X, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { sendEmailTo } from '@/lib/email/admin-notify'
@@ -58,6 +59,10 @@ async function updatePublisherStatus(formData: FormData) {
       console.error('Publisher decision email failed', error)
     }
   }
+
+  // Refresh the list and show the tab the publisher has moved to.
+  revalidatePath('/admin/dashboard/publishers')
+  redirect(`/admin/dashboard/publishers?status=${status}`)
 }
 
 export default async function AdminPublishersPage({
