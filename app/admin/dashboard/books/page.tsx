@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { ArrowLeft, Eye, Check, X, Star } from 'lucide-react'
 import { formatZAR } from '@/lib/utils'
@@ -11,6 +12,7 @@ async function updateBookStatus(formData: FormData) {
   const id = formData.get('id') as string
   const status = formData.get('status') as string
   await supabase.from('books').update({ status }).eq('id', id)
+  revalidatePath('/admin/dashboard/books')
 }
 
 async function toggleFeatured(formData: FormData) {
@@ -19,6 +21,7 @@ async function toggleFeatured(formData: FormData) {
   const id = formData.get('id') as string
   const featured = formData.get('featured') === 'true'
   await supabase.from('books').update({ featured: !featured }).eq('id', id)
+  revalidatePath('/admin/dashboard/books')
 }
 
 const statusStyle: Record<string, { bg: string; border: string; color: string }> = {
