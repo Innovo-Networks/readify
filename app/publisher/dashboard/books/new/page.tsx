@@ -112,7 +112,7 @@ export default function NewBookPage() {
       if (ebookFile) {
         setUploadProgress('Uploading ebook file…')
         const filePath = `ebooks/${user.id}/${Date.now()}-${ebookFile.name}`
-        const { error: fileErr } = await supabase.storage.from('ebooks').upload(filePath, ebookFile, { upsert: true })
+        const { error: fileErr } = await supabase.storage.from('ebooks').upload(filePath, ebookFile, { upsert: false })
         if (fileErr) throw new Error('File upload failed: ' + fileErr.message)
         fileUrl = filePath
       }
