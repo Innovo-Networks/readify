@@ -18,8 +18,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { data: book } = await admin.from('books').select('file_url').eq('id', id).single()
   if (!book?.file_url) return NextResponse.json({ error: 'No file uploaded for this book' }, { status: 404 })
 
-  const { data } = await admin.storage.from('ebooks').createSignedUrl(book.file_url, 600)
-  if (!data?.signedUrl) return NextResponse.json({ error: 'Could not open file' }, { status: 500 })
+  const { data, error } = await admin.storage.from('ebooks').createSignedUrl(book.file_url, 600)
+  if (!data?.signedUrl) {
+    return NextResponse.json({ error: 'Could not open file', detail: error?.message ?? 'no signed URL returned' }, { status: 500 })
+  }
 
   return NextResponse.redirect(data.signedUrl)
 }
