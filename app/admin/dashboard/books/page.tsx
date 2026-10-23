@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
-import { ArrowLeft, Eye, Check, X, Star } from 'lucide-react'
+import { ArrowLeft, Eye, Check, X, Star, FileText } from 'lucide-react'
 import DeleteBookButton from '@/components/admin/DeleteBookButton'
 import { formatZAR } from '@/lib/utils'
 import type { Book } from '@/types'
@@ -177,6 +177,9 @@ export default async function AdminBooksPage({
                           <Link href={`/books/${book.slug}`} target="_blank" className="p-2 rounded-lg transition-colors hover:text-gold-400" style={{ color: 'var(--text-subtle)' }} title="View on site">
                             <Eye className="w-4 h-4" />
                           </Link>
+                          <a href={`/api/admin/books/${book.id}/ebook`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs py-1.5 px-3 inline-flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5" /> Review file
+                          </a>
                           {book.status === 'draft' && (
                             <form action={updateBookStatus}>
                               <input type="hidden" name="id" value={book.id} />
