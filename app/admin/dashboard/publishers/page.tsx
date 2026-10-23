@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Check, X, Clock, CheckCircle2, XCircle } from 'lucide-react'
+import { sendEmailTo } from '@/lib/email/admin-notify'
 
 async function updatePublisherStatus(formData: FormData) {
   'use server'
@@ -19,6 +20,43 @@ async function updatePublisherStatus(formData: FormData) {
   // Also update profile role back to buyer if rejected
   if (status === 'rejected') {
     await supabase.from('profiles').update({ role: 'buyer' }).eq('id', id)
+  }
+
+  // Tell the publisher the decision. Failures are logged and never block the admin action.
+  if (status === 'approved' || status === 'rejected') {
+    try {
+      const { data: publisher } = await supabase
+        .from('publishers')
+        .select('company_name, rejection_reason, profiles(email)')
+        .eq('id', id)
+        .maybeSingle()
+      const email = (publisher as any)?.profiles?.email as string | undefined
+      if (publisher && email) {
+        if (status === 'approved') {
+          await sendEmailTo(email, {
+            subject: 'Your Readify publisher application is approved',
+            heading: 'Welcome to Readify. Your publisher application has been approved.',
+            rows: [
+              ['Company', publisher.company_name],
+              ['Next step', 'Log in and upload your first ebook from your publisher dashboard.'],
+            ],
+            link: { href: '/publisher/dashboard', label: 'Go to your publisher dashboard' },
+          })
+        } else {
+          await sendEmailTo(email, {
+            subject: 'Update on your Readify publisher application',
+            heading: 'Thanks for applying to sell on Readify. We were unable to approve your application at this time.',
+            rows: [
+              ['Company', publisher.company_name],
+              ['Reason', publisher.rejection_reason || 'Not specified'],
+              ['Questions', 'support@innovonet.co.za'],
+            ],
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Publisher decision email failed', error)
+    }
   }
 }
 
