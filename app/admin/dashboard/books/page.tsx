@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { ArrowLeft, Eye, Check, X, Star, FileText } from 'lucide-react'
+import DeleteBookButton from '@/components/admin/DeleteBookButton'
 import { formatZAR } from '@/lib/utils'
 import type { Book } from '@/types'
 
@@ -24,6 +25,18 @@ async function toggleFeatured(formData: FormData) {
   revalidatePath('/admin/dashboard/books')
 }
 
+async function deleteBook(formData: FormData) {
+  'use server'
+  const supabase = await createClient()
+  const id = formData.get('id') as string
+  const { error } = await supabase.from('books').delete().eq('id', id)
+  if (error) {
+    const reason = error.code === '23503' ? 'has-orders' : 'failed'
+    redirect(`/admin/dashboard/books?error=${reason}`)
+  }
+  revalidatePath('/admin/dashboard/books')
+}
+
 const statusStyle: Record<string, { bg: string; border: string; color: string }> = {
   published:   { bg: 'rgba(34,197,94,0.1)',    border: 'rgba(34,197,94,0.3)',    color: '#4ade80' },
   draft:       { bg: 'rgba(255,255,255,0.06)', border: 'var(--border)',          color: 'var(--text-subtle)' },
@@ -36,7 +49,7 @@ const thStyle = { color: 'var(--text-subtle)' }
 export default async function AdminBooksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>
+  searchParams: Promise<{ status?: string; q?: string; error?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -79,6 +92,13 @@ export default async function AdminBooksPage({
       </div>
 
       <div className="page-container py-8">
+        {params.error && (
+          <div className="mb-6 rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
+            {params.error === 'has-orders'
+              ? 'This book has been bought, so it cannot be deleted. Unpublish it instead.'
+              : 'The book could not be deleted. Please try again.'}
+          </div>
+        )}
         {/* Status filter */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {['all', 'published', 'draft', 'unpublished', 'rejected'].map((s) => {
@@ -178,6 +198,7 @@ export default async function AdminBooksPage({
                               </button>
                             </form>
                           )}
+                          <DeleteBookButton id={book.id} title={book.title} action={deleteBook} />
                           <form action={toggleFeatured}>
                             <input type="hidden" name="id" value={book.id} />
                             <input type="hidden" name="featured" value={String(book.featured)} />
