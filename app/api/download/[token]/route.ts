@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const supabase = await createAdminClient()
+  // Plain service-role client with no user session. The cookie-based admin client
+  // sends the buyer's session token, so the download count update is blocked by
+  // row-level security and fails silently.
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  )
 
   // Fetch download record
   const { data: dl } = await supabase
@@ -17,10 +24,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   if (dl.download_count >= dl.max_downloads) return NextResponse.json({ error: 'Download limit reached' }, { status: 429 })
 
   // Increment download count
-  await supabase
+  const { error: countError } = await supabase
     .from('downloads')
     .update({ download_count: dl.download_count + 1, last_downloaded: new Date().toISOString() })
     .eq('id', dl.id)
+  if (countError) console.error('Could not update download count', countError)
 
   const book = dl.books as any
 
