@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer style={{ background: '#050810', color: 'rgba(249,250,251,0.5)' }}>
       <div className="page-container py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
           {/* ── Brand ── */}
           <div className="lg:col-span-1">
@@ -74,9 +74,6 @@ export default function Footer() {
                 { label: 'Become a Publisher',    href: '/publisher/register' },
                 { label: 'Publisher Dashboard',   href: '/publisher/dashboard' },
                 { label: 'Upload a Book',         href: '/publisher/dashboard/books/new' },
-                { label: 'Commission Structure',  href: '/publisher/commission' },
-                { label: 'Payout Information',    href: '/publisher/payouts' },
-                { label: 'Publisher Guidelines',  href: '/publisher/guidelines' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
@@ -85,24 +82,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* ── Company ── */}
-          <div>
-            <h3 className="text-white font-semibold text-xs uppercase tracking-widest mb-4">Company</h3>
-            <ul className="space-y-2.5 text-sm">
-              {[
-                { label: 'About Readify',  href: '/about' },
-                { label: 'How It Works',   href: '/how-it-works' },
-                { label: 'Help Centre',    href: '/help' },
-                { label: 'Privacy Policy', href: '/privacy' },
-                { label: 'Terms of Service', href: '/terms' },
-                { label: 'Refund Policy',  href: '/refunds' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         {/* ── Bottom bar ── */}
