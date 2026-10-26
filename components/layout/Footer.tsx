@@ -96,6 +96,9 @@ export default function Footer() {
                 { label: 'Privacy Policy', href: '/privacy' },
                 { label: 'Terms of Service', href: '/terms' },
                 { label: 'Refund Policy',  href: '/refunds' },
+                { label: 'Cookie Policy', href: '/cookies' },
+                { label: 'POPIA Notice',   href: '/popia' },
+                { label: 'Publisher Agreement', href: '/publisher/agreement' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
