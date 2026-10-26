@@ -136,7 +136,7 @@ export default function Footer() {
           </div>
 
           <p className="text-xs text-center md:text-right" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            © {new Date().getFullYear()} Readify (Pty) Ltd. All rights reserved.{' '}
+            © {new Date().getFullYear()} Innovo Networks (Pty) Ltd, trading as Readify. All rights reserved.{' '}
             VAT-registered in South Africa. Prices include 15% VAT.
           </p>
         </div>
