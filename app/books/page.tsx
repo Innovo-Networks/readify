@@ -3,7 +3,7 @@ import BookCard from '@/components/books/BookCard'
 import Link from 'next/link'
 import { Search, SlidersHorizontal, BookOpen, Star, Flame, TrendingUp } from 'lucide-react'
 import type { Book, Category } from '@/types'
-import { SEED_BOOKS, SEED_CATEGORIES, filterSeedBooks } from '@/lib/data/seed-books'
+import { SEED_CATEGORIES } from '@/lib/data/seed-books'
 
 interface SearchParams {
   q?: string
@@ -58,12 +58,7 @@ async function getBooks(params: SearchParams) {
 
   const { data, count } = await query
 
-  // Fall back to seed catalog when database is empty or not yet set up
-  if (!data || data.length === 0) {
-    const seed = filterSeedBooks({ ...params, page, pageSize: PAGE_SIZE })
-    return seed
-  }
-
+  // No demo fallback: an empty result means no matching published books.
   return { books: (data as Book[]) || [], total: count || 0, page }
 }
 
