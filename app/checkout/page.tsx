@@ -63,34 +63,21 @@ export default function CheckoutPage() {
         throw new Error('Demo catalogue titles cannot be purchased yet. Please choose a title published by a publisher.')
       }
 
-      const { data: order, error } = await supabase.from('orders').insert({
-        buyer_id:       user?.id || null,
-        buyer_name:     form.name,
-        buyer_email:    form.email,
-        subtotal,
-        discount,
-        vat_amount:     vat,
-        vat_rate:       15,
-        total,
-        currency:       'ZAR',
-        payment_method: method,
-        promotion_code: promoApplied ? promoCode.toUpperCase().trim() : null,
-        status:         'pending',
-      }).select().single()
-
-      if (error || !order) throw new Error('Failed to create order')
-
-      const { error: itemsError } = await supabase.from('order_items').insert(
-        items.map((i) => ({
-          order_id:     order.id,
-          book_id:      i.book.id,
-          publisher_id: i.book.publisher_id,
-          title:        i.book.title,
-          cover_url:    i.book.cover_url,
-          price:        i.book.price,
-        }))
-      )
-      if (itemsError) throw new Error('Could not add the books to your order. Please try again.')
+      // The server reads prices, titles and the promo discount from the database,
+      // so the browser only sends which books and who is buying.
+      const orderRes = await fetch('/api/checkout/create-order', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items:     items.map((i) => i.book.id),
+          name:      form.name,
+          email:     form.email,
+          method,
+          promoCode: promoApplied ? promoCode.toUpperCase().trim() : null,
+        }),
+      })
+      const orderData = await orderRes.json()
+      if (!orderRes.ok || !orderData.orderId) throw new Error(orderData.error || 'Failed to create order')
+      const order = { id: orderData.orderId as string }
 
       if (method === 'payfast') {
         const res = await fetch('/api/payfast/create-payment', {
