@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/auth/TurnstileWidget'
 import { Loader2, BookOpen } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
@@ -9,15 +10,20 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaKey, setCaptchaKey] = useState(0)
   const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (TURNSTILE_ENABLED && !captchaToken) { setError('Please complete the security check'); return }
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
+      captchaToken: captchaToken ?? undefined,
     })
+    setCaptchaKey((k) => k + 1)
     setLoading(false)
     if (error) { setError(error.message); return }
     setSent(true)
@@ -54,6 +60,7 @@ export default function ForgotPasswordPage() {
                 className="w-full py-3 px-4 rounded-xl border text-sm"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
               />
+              <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaKey} />
               {error && <p className="text-sm text-red-400">{error}</p>}
               <button
                 type="submit"
