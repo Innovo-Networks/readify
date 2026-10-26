@@ -46,6 +46,8 @@ export default function TurnstileWidget({
       if (cancelled || !containerRef.current || !window.turnstile || widgetIdRef.current) return
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
+        // Always show the checkbox, so every visitor completes it on the auth forms.
+        appearance: 'always',
         callback: (token: string) => onTokenRef.current(token),
         'expired-callback': () => onTokenRef.current(null),
         'error-callback': () => onTokenRef.current(null),
