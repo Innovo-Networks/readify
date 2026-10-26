@@ -102,7 +102,7 @@ export default async function HomePage() {
             <div className="mb-10 animate-fade-in">
               <div className="relative rounded-2xl inline-block shadow-[0_0_40px_rgba(245,166,35,0.2)] p-3"
                 style={{ width: 120, height: 120 }}>
-                <Image src="/logo-mark-dark.png" alt="Read.ify" fill sizes="120px" className="object-contain p-3" priority />
+                <Image src="/logo-mark-dark.png" alt="Readify" fill sizes="120px" className="object-contain p-3" priority />
               </div>
             </div>
 

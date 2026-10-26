@@ -13,12 +13,10 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3 mb-5 group">
               <div className="relative shrink-0 group-hover:scale-105 transition-transform duration-300" style={{ width: 48, height: 48 }}>
-                <Image src="/logo-mark-dark.png" alt="Read.ify logo" fill sizes="48px" className="object-contain" />
+                <Image src="/logo-mark-dark.png" alt="Readify logo" fill sizes="48px" className="object-contain" />
               </div>
               <span className="font-extrabold text-2xl tracking-tight font-display">
-                <span className="text-white">Read</span>
-                <span className="text-gold-500">.</span>
-                <span className="text-white">ify</span>
+                <span className="text-white">Read</span><span className="text-gold-500">ify</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-5">
