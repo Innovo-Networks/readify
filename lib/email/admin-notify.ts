@@ -32,7 +32,7 @@ export async function sendEmailTo(to: string, email: AdminEmail, options: { repl
   if (!apiKey || !to) return false
 
   const from = process.env.BOOK_REPORT_FROM_EMAIL || 'Readify <onboarding@resend.dev>'
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://readify.co.za'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.milourose.com'
   const link = email.link ? `${appUrl}${email.link.href}` : null
 
   const text = [

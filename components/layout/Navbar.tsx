@@ -163,7 +163,7 @@ export default function Navbar() {
             </button>
 
             {/* Cart */}
-            <Link href="/cart" className="relative p-2 text-white/70 hover:text-white transition-colors rounded-xl hover:bg-white/08">
+            <Link href="/cart" aria-label="Cart" className="relative p-2 text-white/70 hover:text-white transition-colors rounded-xl hover:bg-white/08">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-5 h-5 text-[10px] font-bold rounded-full flex items-center justify-center"
@@ -246,7 +246,7 @@ export default function Navbar() {
             <button onClick={toggleDark} className="p-2 text-white/60 hover:text-white" aria-label="Toggle theme">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <Link href="/cart" className="relative p-2 text-white/70">
+            <Link href="/cart" aria-label="Cart" className="relative p-2 text-white/70">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center"

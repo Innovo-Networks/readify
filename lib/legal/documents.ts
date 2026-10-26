@@ -72,7 +72,7 @@ export const LEGAL_DOCUMENTS: Record<string, LegalDocument> = {
       },
       {
         "type": "p",
-        "text": "Publishers must own or have all necessary rights (copyright, permissions, moral rights) to the content uploaded. By uploading, you grant Readify a non-exclusive licence to host, display, market, and deliver the ebook to buyers, and to collect and remit the net proceeds after commission and any applicable taxes or fees. Publishers are solely responsible for the content, accuracy, legality, and quality of their ebooks and for any taxes on their earnings. Payout methods, schedules, and minimum thresholds will be detailed in the Publisher Dashboard and Payout Information pages. We may withhold or reverse payouts in cases of chargebacks, refunds, fraud, or policy violations."
+        "text": "Publishers must own or have all necessary rights (copyright, permissions, moral rights) to the content uploaded. By uploading, you grant Readify a non-exclusive licence to host, display, market, and deliver the ebook to buyers, and to collect and remit the net proceeds after commission and any applicable taxes or fees. Publishers are solely responsible for the content, accuracy, legality, and quality of their ebooks and for any taxes on their earnings. Payout methods, schedules, and minimum thresholds will be detailed in the Publisher Dashboard. We may withhold or reverse payouts in cases of chargebacks, refunds, fraud, or policy violations."
       },
       {
         "type": "p",
@@ -641,7 +641,7 @@ export const LEGAL_DOCUMENTS: Record<string, LegalDocument> = {
       },
       {
         "type": "p",
-        "text": "Payouts will be made according to the schedule and minimum thresholds published in the Publisher Dashboard / Payout Information section. Readify may withhold or offset amounts in respect of refunds, chargebacks, fraud, or taxes. Publisher is responsible for its own tax obligations on earnings."
+        "text": "Payouts will be made according to the schedule and minimum thresholds published in the Publisher Dashboard. Readify may withhold or offset amounts in respect of refunds, chargebacks, fraud, or taxes. Publisher is responsible for its own tax obligations on earnings."
       },
       {
         "type": "h2",
