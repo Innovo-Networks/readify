@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
 import { safeRedirect, withRedirect } from '@/lib/auth-redirect'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/auth/TurnstileWidget'
 import { Loader2, Eye, EyeOff, BookOpen, ShoppingBag, Upload, Check, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function getPasswordStrength(password: string): { score: number; label: string; color: string } {
@@ -33,6 +34,8 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const [terms, setTerms] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaKey, setCaptchaKey] = useState(0)
   const supabase = createClient()
   const pwStrength = getPasswordStrength(form.password)
 
@@ -41,6 +44,7 @@ function RegisterForm() {
     if (!terms) { setError('Please accept the Terms of Service to continue'); return }
     if (form.password !== form.confirmPassword) { setError('Passwords do not match'); return }
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (TURNSTILE_ENABLED && !captchaToken) { setError('Please complete the security check'); return }
     setLoading(true)
     setError('')
 
@@ -48,6 +52,7 @@ function RegisterForm() {
       email: form.email,
       password: form.password,
       options: {
+        captchaToken: captchaToken ?? undefined,
         data: { full_name: form.name, role },
         // Send the confirmation link back to whichever host the user signed up on
         // (production, a Vercel preview, or localhost) instead of the Supabase Site URL.
@@ -55,6 +60,7 @@ function RegisterForm() {
         emailRedirectTo: `${window.location.origin}${withRedirect('/auth/callback', role === 'publisher' ? '/publisher/register' : redirect)}`,
       },
     })
+    setCaptchaKey((k) => k + 1)
     if (error) { setError(error.message); setLoading(false); return }
     setSuccess(true)
   }
@@ -318,6 +324,8 @@ function RegisterForm() {
                 <Link href="/privacy" className="text-gold-500 hover:underline">Privacy Policy</Link>
               </span>
             </label>
+
+            <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaKey} />
 
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3">
               {loading ? (

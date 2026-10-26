@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { GOOGLE_AUTH_ENABLED } from '@/lib/payments'
 import { safeRedirect, withRedirect } from '@/lib/auth-redirect'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/auth/TurnstileWidget'
 import { Loader2, Eye, EyeOff, BookOpen, ShieldCheck, Zap, Globe } from 'lucide-react'
 
 function LoginForm() {
@@ -15,13 +16,21 @@ function LoginForm() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaKey, setCaptchaKey] = useState(0)
   const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (TURNSTILE_ENABLED && !captchaToken) { setError('Please complete the security check'); return }
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+      options: { captchaToken: captchaToken ?? undefined },
+    })
+    setCaptchaKey((k) => k + 1)
     if (error) { setError(error.message); setLoading(false); return }
     router.push(redirect)
     router.refresh()
@@ -182,6 +191,8 @@ function LoginForm() {
                 {error}
               </div>
             )}
+
+            <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaKey} />
 
             <button
               type="submit"
