@@ -1,8 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { withRedirect } from '@/lib/auth-redirect'
 import {
   isValidVatNumber, isValidCipcNumber, isValidAccountNumber, isValidBranchCode,
   documentError, documentExtension,
@@ -35,6 +36,15 @@ export default function PublisherRegisterPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [files, setFiles] = useState<{ cipc?: File; bank?: File; vat?: File }>({})
+  const [authState, setAuthState] = useState<'checking' | 'signed-out' | 'signed-in'>('checking')
+
+  // The application is saved to an account, so visitors must sign in or register first.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setAuthState(user ? 'signed-in' : 'signed-out')
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [form, setForm] = useState({
     company_name: '',
@@ -142,6 +152,36 @@ export default function PublisherRegisterPage() {
     fetch('/api/notify/publisher-application', { method: 'POST' }).catch(() => {})
     setSuccess(true)
     setLoading(false)
+  }
+
+  if (authState !== 'signed-in' && !success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'var(--bg)' }}>
+        <div className="max-w-md w-full text-center">
+          {authState === 'checking' ? (
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-gold-500" />
+          ) : (
+            <>
+              <BookOpen className="w-10 h-10 text-gold-500 mx-auto mb-6" />
+              <h1 className="font-display text-3xl font-bold mb-3" style={{ color: 'var(--text)' }}>
+                Create a publisher account first
+              </h1>
+              <p className="mb-8" style={{ color: 'var(--text-muted)' }}>
+                Your application is saved to your Readify account. Sign in if you already have one, or create a free account to continue.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href={withRedirect('/auth/register', '/publisher/register')} className="btn-primary">
+                  Create account
+                </Link>
+                <Link href={withRedirect('/auth/login', '/publisher/register')} className="btn-secondary">
+                  Sign in
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (success) {
