@@ -56,15 +56,6 @@ const DRIVE_CATALOG: Array<{
 
   // ── Business & Finance folder ──
   {
-    driveFileId: '1Mf7LtRKw3G1Sp3DpZSg0cZIko2Hwhm4u',
-    title: 'How to DeFi: A Beginners Guide',
-    folderKey: 'business_finance',
-    price: 149,
-    featured: true,
-    tags: ['defi', 'crypto', 'finance'],
-    description: 'The most comprehensive guide to decentralised finance — DeFi protocols, yield farming, and the crypto ecosystem.',
-  },
-  {
     driveFileId: '1tDquYwTIcmPosFMpr8nNLponjZ8dx-uE',
     title: 'How to DeFi: Advanced Strategies',
     folderKey: 'business_finance',

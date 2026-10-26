@@ -99,10 +99,6 @@ function book(driveId: string, title: string, cat: Category, price: number, opts
 
 export const SEED_BOOKS: Book[] = [
   // ── BUSINESS & FINANCE ──
-  book('1Mf7LtRKw3G1Sp3DpZSg0cZIko2Hwhm4u', 'How to DeFi: A Beginners Guide', CAT_BF, 149, {
-    description: 'The most comprehensive guide to decentralised finance. Learn DeFi protocols, yield farming, and how to navigate the crypto ecosystem safely.',
-    tags: ['defi', 'crypto', 'finance'], featured: true, rating: 4.6, reviews: 34,
-  }),
   book('1tDquYwTIcmPosFMpr8nNLponjZ8dx-uE', 'How to DeFi Advanced Strategies', CAT_BF, 199, {
     description: 'Take your DeFi knowledge to the next level with advanced trading strategies, liquidity provision, and protocol analysis.',
     tags: ['defi', 'crypto', 'advanced'], rating: 4.8, reviews: 21,
