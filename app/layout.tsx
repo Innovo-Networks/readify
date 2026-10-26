@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://readify.co.za'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.milourose.com'),
   title: {
     default: 'Read.ify — South Africa\'s Ebook Marketplace',
     template: '%s | Read.ify',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_ZA',
-    url: 'https://readify.co.za',
+    url: 'https://www.milourose.com',
     siteName: 'Read.ify',
     title: 'Read.ify — South Africa\'s Ebook Marketplace',
     description: 'Discover and download thousands of ebooks from publishers and authors.',
