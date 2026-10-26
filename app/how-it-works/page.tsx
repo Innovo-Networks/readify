@@ -10,7 +10,7 @@ const STEPS = [
   },
   {
     title: 'Pay in Rand',
-    body: 'Check out securely in South African Rand. Prices include 15% VAT. You can pay with PayFast.',
+    body: 'Check out securely in South African Rand. 15% VAT is added at checkout. You can pay with PayFast.',
   },
   {
     title: 'Download instantly',

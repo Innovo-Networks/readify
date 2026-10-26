@@ -137,7 +137,7 @@ export default function Footer() {
 
           <p className="text-xs text-center md:text-right" style={{ color: 'rgba(255,255,255,0.3)' }}>
             © {new Date().getFullYear()} Innovo Networks (Pty) Ltd, trading as Readify. All rights reserved.{' '}
-            VAT-registered in South Africa. Prices include 15% VAT.
+            VAT-registered in South Africa. 15% VAT is added at checkout.
           </p>
         </div>
       </div>

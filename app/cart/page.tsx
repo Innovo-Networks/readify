@@ -157,7 +157,7 @@ export default function CartPage() {
               </div>
 
               <p className="text-xs mb-5" style={{ color: 'var(--text-subtle)' }}>
-                VAT included. Instant PDF download after successful payment.
+                15% VAT is added to the subtotal. Instant PDF download after successful payment.
               </p>
 
               <Link href="/checkout" className="btn-primary w-full justify-center">

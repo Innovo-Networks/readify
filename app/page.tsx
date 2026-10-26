@@ -372,7 +372,7 @@ export default async function HomePage() {
               {
                 icon: Globe,
                 title: 'Priced in Rand',
-                desc: 'Every price is in ZAR with 15% VAT included, so what you see is what you pay.',
+                desc: 'Every price is in ZAR. 15% VAT is added at checkout, so the total is shown before you pay.',
                 tag: 'Local SA',
                 tagColor: '#f5a623',
                 iconColor: '#f5a623',
@@ -446,7 +446,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               { step: '01', icon: BookOpen,    title: 'Browse & Choose', desc: 'Explore thousands of ebooks across categories and find your next great read.' },
-              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely by card or Instant EFT. 15% SA VAT included in all prices.' },
+              { step: '02', icon: CreditCard,  title: 'Secure Checkout', desc: 'Pay safely by card or Instant EFT. 15% SA VAT is added at checkout.' },
               { step: '03', icon: Download,    title: 'Instant Download', desc: 'Get immediate access to your ebook. Download to any device, anytime.' },
             ].map((s) => (
               <div key={s.step} className="glass-card p-6 relative">
