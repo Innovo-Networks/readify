@@ -97,12 +97,10 @@ export default function Navbar() {
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <div className="relative shrink-0" style={{ width: 38, height: 38 }}>
-              <Image src="/logo-mark-dark.png" alt="Read.ify" fill sizes="38px" className="object-contain" priority />
+              <Image src="/logo-mark-dark.png" alt="Readify" fill sizes="38px" className="object-contain" priority />
             </div>
             <span className="font-extrabold text-xl tracking-tight font-display hidden sm:block">
-              <span className="text-white">Read</span>
-              <span className="text-gold-500">.</span>
-              <span className="text-white">ify</span>
+              <span className="text-white">Read</span><span className="text-gold-500">ify</span>
             </span>
           </Link>
 

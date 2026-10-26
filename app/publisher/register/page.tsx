@@ -226,7 +226,7 @@ export default function PublisherRegisterPage() {
           <Link href="/" className="flex items-center gap-2 mb-8">
             <BookOpen className="w-7 h-7 text-gold-500" />
             <span className="font-display text-xl font-bold text-white">
-              Read<span className="text-gold-500">.</span>ify
+              Read<span className="text-gold-500">ify</span>
             </span>
           </Link>
 

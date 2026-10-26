@@ -64,7 +64,7 @@ function LoginForm() {
         <Link href="/" className="relative z-10 flex items-center gap-2">
           <BookOpen className="w-8 h-8 text-gold-500" />
           <span className="font-display text-2xl font-bold text-white">
-            Read<span className="text-gold-500">.</span>ify
+            Read<span className="text-gold-500">ify</span>
           </span>
         </Link>
 
@@ -105,7 +105,7 @@ function LoginForm() {
           <Link href="/" className="flex lg:hidden items-center gap-2 mb-8 justify-center">
             <BookOpen className="w-7 h-7 text-gold-500" />
             <span className="font-display text-xl font-bold" style={{ color: 'var(--text)' }}>
-              Read<span className="text-gold-500">.</span>ify
+              Read<span className="text-gold-500">ify</span>
             </span>
           </Link>
 
