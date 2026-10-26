@@ -266,7 +266,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
                   )}
                 </div>
                 {discount && <p className="text-sm text-green-600 font-medium mt-1">You save {formatZAR(book.original_price! - book.price)} ({discount}% off)</p>}
-                <p className="text-xs text-gray-400 mt-1">Price includes 15% VAT</p>
+                <p className="text-xs text-gray-400 mt-1">Plus 15% VAT at checkout</p>
               </div>
 
               <AddToCartButton book={book} />
