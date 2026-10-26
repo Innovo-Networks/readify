@@ -74,9 +74,7 @@ export default function Footer() {
                 { label: 'Become a Publisher',    href: '/publisher/register' },
                 { label: 'Publisher Dashboard',   href: '/publisher/dashboard' },
                 { label: 'Upload a Book',         href: '/publisher/dashboard/books/new' },
-                { label: 'Commission Structure',  href: '/publisher/commission' },
-                { label: 'Payout Information',    href: '/publisher/payouts' },
-                { label: 'Publisher Guidelines',  href: '/publisher/guidelines' },
+                { label: 'Commission Structure',  href: '/publisher/agreement' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
@@ -90,9 +88,8 @@ export default function Footer() {
             <h3 className="text-white font-semibold text-xs uppercase tracking-widest mb-4">Company</h3>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: 'About Readify',  href: '/about' },
                 { label: 'How It Works',   href: '/how-it-works' },
-                { label: 'Help Centre',    href: '/help' },
+                { label: 'Help Centre',    href: 'mailto:support@innovonet.co.za' },
                 { label: 'Privacy Policy', href: '/privacy' },
                 { label: 'Terms of Service', href: '/terms' },
                 { label: 'Refund Policy',  href: '/refunds' },
