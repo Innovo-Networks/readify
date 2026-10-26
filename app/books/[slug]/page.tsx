@@ -19,9 +19,8 @@ async function getBook(slug: string): Promise<Book | null> {
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
-  if (data) return data as Book
-  // Fall back to the seed catalogue (same source /books uses while the database is empty)
-  return SEED_BOOKS.find((b) => b.slug === slug) ?? null
+  // Only published books from the database; anything else is a 404.
+  return (data as Book) ?? null
 }
 
 async function getReviews(bookId: string): Promise<Review[]> {
