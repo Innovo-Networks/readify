@@ -260,7 +260,7 @@ export default function NewBookPage() {
                       <input type="number" className="input pl-7" placeholder="149.00" step="0.01" min="0"
                         value={form.price} onChange={(e) => update('price', e.target.value)} required />
                     </div>
-                    <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>Price includes 15% VAT</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-subtle)' }}>Enter the price before VAT. Buyers pay 15% VAT on top.</p>
                   </div>
                   <div>
                     <FieldLabel optional>Original Price (for sale display)</FieldLabel>
