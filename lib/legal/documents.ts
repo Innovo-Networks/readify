@@ -52,7 +52,7 @@ export const LEGAL_DOCUMENTS: Record<string, LegalDocument> = {
       },
       {
         "type": "p",
-        "text": "All prices are displayed in South African Rand (ZAR) before VAT. 15% VAT is added at checkout, and the total payable is shown before you pay. Payment is processed securely via PayFast (card, Instant EFT, SnapScan, Zapper, Mobicred). Readify does not store full card details. Upon successful payment, the ebook is made available for immediate download. You receive a personal, non-exclusive, non-transferable, non-sublicensable licence to download and use the ebook for your personal, non-commercial use only. You may not redistribute, share, resell, or publicly display the ebook."
+        "text": "Figures are presented in South African Rand (ZAR) exclusive of VAT. Applicable VAT at 15% gets calculated during checkout, displaying the final amount due prior to payment processing. Payment is processed securely via PayFast (card, Instant EFT, SnapScan, Zapper, Mobicred). Readify does not store full card details. Upon successful payment, the ebook is made available for immediate download. You receive a personal, non-exclusive, non-transferable, non-sublicensable licence to download and use the ebook for your personal, non-commercial use only. You may not redistribute, share, resell, or publicly display the ebook."
       },
       {
         "type": "p",
