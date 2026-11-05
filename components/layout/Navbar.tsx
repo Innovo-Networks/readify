@@ -99,9 +99,14 @@ export default function Navbar() {
             <div className="relative shrink-0" style={{ width: 38, height: 38 }}>
               <Image src="/logo-mark-dark.png" alt="Readify" fill sizes="38px" className="object-contain" priority />
             </div>
-            <span className="font-extrabold text-xl tracking-tight font-display hidden sm:block">
-              <span className="text-white">Read</span><span className="text-gold-500">ify</span>
-            </span>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="font-extrabold text-xl tracking-tight font-display">
+                <span className="text-white">Read</span><span className="text-gold-500">ify</span>
+              </span>
+              <span className="hidden md:block text-[10px] font-medium" style={{ color: '#ffffff' }}>
+                Powered by Innovo Networks (Pty) Ltd
+              </span>
+            </div>
           </Link>
 
           {/* ── Search (desktop) ── */}
