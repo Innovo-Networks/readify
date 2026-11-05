@@ -158,6 +158,10 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
+
+            <p className="text-sm font-medium animate-slide-up" style={{ color: '#ffffff', animationDelay: '0.3s' }}>
+              Powered by Innovo Networks (Pty) Ltd
+            </p>
           </div>
         </div>
 
